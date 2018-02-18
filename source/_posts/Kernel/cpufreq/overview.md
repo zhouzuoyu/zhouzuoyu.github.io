@@ -1,6 +1,6 @@
 ---
 title: cpufreq(1)_overview
-date: {{ date }}
+date: 2018-02-7 12:00:00
 categories:
 - Kernel
 - cpufreq

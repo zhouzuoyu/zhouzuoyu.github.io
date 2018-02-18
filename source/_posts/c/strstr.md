@@ -1,6 +1,6 @@
 ---
 title: strstr
-date: 2018-02-14 11:55:53
+date: 2018-02-8 12:00:00
 categories:
 - c
 ---

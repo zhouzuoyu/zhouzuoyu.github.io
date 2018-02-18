@@ -1,6 +1,6 @@
 ---
 title: nand(1)_overview
-date: {{ date }}
+date: 2018-02-5 12:00:00
 categories:
 - Kernel
 - nand

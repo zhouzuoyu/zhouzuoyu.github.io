@@ -1,6 +1,6 @@
 ---
 title: cpufreq(4)_dbs_governor
-date: {{ date }}
+date: 2018-02-7 12:00:00
 categories:
 - Kernel
 - cpufreq

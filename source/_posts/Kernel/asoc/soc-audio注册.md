@@ -1,6 +1,6 @@
 ---
 title: soc-audio注册
-date: {{date}}
+date: 2018-02-8 12:00:00
 categories:
 - Kernel
 - asoc

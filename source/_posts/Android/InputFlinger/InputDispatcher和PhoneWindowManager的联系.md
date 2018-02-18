@@ -1,6 +1,6 @@
 ---
 title: InputFlinger(7)_InputDispatcher和PhoneWindowManager的联系
-date: {{ date }}
+date: 2018-02-11 12:00:00
 categories: 
 - Android
 - InputFlinger

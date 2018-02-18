@@ -1,6 +1,6 @@
 ---
 title: InputFlinger(4)_InputDispatcher
-date: {{ date }}
+date: 2018-02-11 12:00:00
 categories: 
 - Android
 - InputFlinger

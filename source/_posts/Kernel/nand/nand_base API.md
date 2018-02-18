@@ -1,6 +1,6 @@
 ---
 title: nand(4)_nand_base API
-date: {{ date }}
+date: 2018-02-5 12:00:00
 categories:
 - Kernel
 - nand

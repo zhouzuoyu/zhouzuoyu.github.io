@@ -1,6 +1,6 @@
 ---
 title: 内核链表
-date: {{date}}
+date: 2018-02-8 12:00:00
 categories:
 - c
 ---

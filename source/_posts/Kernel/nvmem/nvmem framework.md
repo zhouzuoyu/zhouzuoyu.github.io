@@ -1,6 +1,6 @@
 ---
 title: nvmem(1)_framework
-date: {{ date }}
+date: 2018-02-4 12:00:00
 categories:
 - Kernel
 - nvmem

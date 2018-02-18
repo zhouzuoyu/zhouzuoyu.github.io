@@ -1,6 +1,6 @@
 ---
 title: memmove
-date: 2018-02-14 17:20:50
+date: 2018-02-8 12:00:00
 categories:
 - c
 ---

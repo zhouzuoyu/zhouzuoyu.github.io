@@ -1,6 +1,6 @@
 ---
 title: Android Sensors(2)_HAL测试程序
-date: {{ date }}
+date: 2018-02-9 12:00:00
 categories: 
 - Android
 - Sensors

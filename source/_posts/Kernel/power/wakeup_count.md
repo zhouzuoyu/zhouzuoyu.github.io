@@ -1,6 +1,6 @@
 ---
 title: PM(5)_wakeup_count
-date: {{ date }}
+date: 2018-02-3 12:00:00
 categories:
 - Kernel
 - Power

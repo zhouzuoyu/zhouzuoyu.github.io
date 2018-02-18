@@ -1,6 +1,6 @@
 ---
 title: i2c(4)_i2c_bus_type
-date: {{ date }}
+date: 2018-02-6 12:00:00
 categories:
 - Kernel
 - i2c

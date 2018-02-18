@@ -1,6 +1,6 @@
 ---
 title: Android Lights(3)_DisplayPowerController
-date: {{ date }}
+date: 2018-02-10 12:00:00
 categories: 
 - Android
 - Lights
