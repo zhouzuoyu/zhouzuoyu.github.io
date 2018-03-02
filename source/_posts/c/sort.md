@@ -97,11 +97,11 @@ void quick_sort(int *a, int n)
 		while (a[i] < p)
 			i++;
 		while (a[j] > p)
-			j++;
+			j--;
 		if (i >= j)
 			break;
 		// exchange
-		tmp = a[i]; a[i] = a[j]; a[j] = tmp;	// exchange
+		tmp = a[i]; a[i] = a[j]; a[j] = tmp;
 	}
 	quick_sort(a, i);
 	quick_sort(a+i, n-i);
