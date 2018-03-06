@@ -29,7 +29,7 @@ static void *memcpy(void *dst, const void *src, size_t n)
 # memmove
 > 需要考虑mem有重叠的情况
 
-![memmove](memmove/memmove.png)
+![memmove](mem/memmove.png)
 
 重叠有两种情况
 1. dst部分地址被src踩到
