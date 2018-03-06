@@ -1,5 +1,5 @@
 ---
-title: memmove
+title: mem处理
 date: 2018-02-8 12:00:00
 categories:
 - c
@@ -10,18 +10,18 @@ categories:
 ```c
 static void *memcpy(void *dst, const void *src, size_t n)
 {
-    if (dst==NULL || src==NULL)
+	if (dst==NULL || src==NULL)
 		return NULL;
 
 	// 按字节cp，所以需要void * -> char *
-    char *p1 = (char *)dst;
-    char *p2 = (char *)src;
+	char *p1 = (char *)dst;
+	char *p2 = (char *)src;
 
-    while (n--)
+	while (n--)
 		*(p1++) = *(p2++);
 
 	// 返回，可以级联使用
-    return dst;
+	return dst;
 }
 
 ```
