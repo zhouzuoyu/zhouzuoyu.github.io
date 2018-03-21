@@ -3,7 +3,7 @@ title: 字符设备(2)_Misc设备
 date: 2018-02-7 12:00:00
 categories: 
 - Linux
-- Chrdev
+- chrdev
 ---
 
 1. 源码：

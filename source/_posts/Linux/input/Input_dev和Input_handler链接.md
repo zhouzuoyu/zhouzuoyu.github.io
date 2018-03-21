@@ -3,7 +3,7 @@ title: Input子系统(2)_input_dev和input_handler链接
 date: 2018-01-30 15:41:36
 categories:
 - Linux
-- Input
+- input
 ---
 
 注册input_dev时将会遍历所有的input_handler_list，然后调用input_attach_handler进行attach，注册input_handler亦然。

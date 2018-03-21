@@ -3,7 +3,7 @@ title: PM(5)_wakeup_count
 date: 2018-02-3 12:00:00
 categories:
 - Linux
-- Power
+- power
 ---
 # 源码
 > kernel\power\main.c

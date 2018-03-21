@@ -3,7 +3,7 @@ title: PM(2)_启动suspend
 date: 2018-02-3 12:00:00
 categories:
 - Linux
-- Power
+- power
 ---
 
 # 功能

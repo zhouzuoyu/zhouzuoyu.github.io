@@ -3,7 +3,7 @@ title: Input子系统(4)_input_handler
 date: 2018-01-30 15:34:06
 categories:
 - Linux
-- Input
+- input
 ---
 
 # evdev.c分析

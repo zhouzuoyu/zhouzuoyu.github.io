@@ -3,7 +3,7 @@ title: PM(8)_autosleep
 date: 2018-02-3 12:00:00
 categories:
 - Linux
-- Power
+- power
 ---
 # 源码
 Autosleep.c (linux-4.13.1\kernel\power)

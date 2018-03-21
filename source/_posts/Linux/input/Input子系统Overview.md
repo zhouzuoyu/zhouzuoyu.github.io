@@ -3,7 +3,7 @@ title: Input子系统(1)_Overview
 date: 2018-01-30 14:11:06
 categories:
 - Linux
-- Input
+- input
 ---
 
 input子系统下的设备分为两类(input_handler/input_dev)

@@ -3,7 +3,7 @@ title: Input子系统(3)_input_dev
 date: 2018-01-30 13:48:21
 categories:
 - Linux
-- Input
+- input
 ---
 
 # 注册input device流程
