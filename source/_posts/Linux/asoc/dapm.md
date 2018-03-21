@@ -7,11 +7,17 @@ categories:
 - dapm
 ---
 
-> Wm8960.c (linux-3.0.86\sound\soc\codecs)
+> wm8960.c (linux-3.0.86\sound\soc\codecs)
 > soc-dapm.c (linux-3.0.86\sound\soc\codecs)
 
-先注册再添加route
-
+先注册widget再添加route
+```c
+static int wm8960_add_widgets(struct snd_soc_codec *codec)
+	snd_soc_dapm_new_controls(dapm, wm8960_dapm_widgets,
+				  ARRAY_SIZE(wm8960_dapm_widgets));
+	snd_soc_dapm_add_routes(dapm, audio_paths, ARRAY_SIZE(audio_paths));
+```
+<!--more-->
 # snd_soc_dapm_new_controls
 定义各种widget
 ```c
@@ -20,7 +26,7 @@ static const struct snd_soc_dapm_widget wm8960_dapm_widgets[] = {
 	...
 };
 ```
-<!--more-->
+
 注册widgets
 ```c
 snd_soc_dapm_new_controls(dapm, wm8960_dapm_widgets, ARRAY_SIZE(wm8960_dapm_widgets));
@@ -31,9 +37,7 @@ snd_soc_dapm_new_controls(dapm, wm8960_dapm_widgets, ARRAY_SIZE(wm8960_dapm_widg
 		widget++;
 	}
 ```
-
 # snd_soc_dapm_add_routes
-
 > sink <- control <- source
 
 声明使用哪些widget组成route
