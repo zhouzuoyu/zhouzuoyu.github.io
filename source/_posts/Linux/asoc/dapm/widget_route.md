@@ -34,6 +34,7 @@ snd_soc_dapm_new_controls(dapm, wm8960_dapm_widgets, ARRAY_SIZE(wm8960_dapm_widg
 		ret = snd_soc_dapm_new_control(dapm, widget);
 			w = dapm_cnew_widget(widget);
 			list_add(&w->list, &dapm->card->widgets);	// 添加到链表中
+			w->connected = 1;
 		widget++;
 	}
 ```
@@ -49,6 +50,7 @@ static const struct snd_soc_dapm_route audio_paths[] = {
 ```
 
 添加route
+通过widget可以找到path，再通过path找到source和sink
 ```c
 snd_soc_dapm_add_routes(dapm, audio_paths, ARRAY_SIZE(audio_paths));
 	for (i = 0; i < num; i++) {
@@ -72,7 +74,7 @@ snd_soc_dapm_add_routes(dapm, audio_paths, ARRAY_SIZE(audio_paths));
 			
 			// 创建并且init path
 			path = kzalloc(sizeof(struct snd_soc_dapm_path), GFP_KERNEL);
-			// 保存
+			// 2. path中保存widget信息
 			path->source = wsource;
 			path->sink = wsink;
 			path->connected = route->connected;
@@ -80,6 +82,7 @@ snd_soc_dapm_add_routes(dapm, audio_paths, ARRAY_SIZE(audio_paths));
 			// { "Left Input Mixer", NULL, "LINPUT1", }: 直连
 			if (control == NULL) {
 				list_add(&path->list, &dapm->card->paths);
+				// 1. widget中保存path信息
 				list_add(&path->list_sink, &wsink->sources);
 				list_add(&path->list_source, &wsource->sinks);
 				path->connect = 1;
@@ -146,12 +149,12 @@ SND_SOC_DAPM_MIXER("Left Boost Mixer", WM8960_POWER1, 5, 0,
 ```
 ```c
 dapm_connect_mixer
-	for (i = 0; i < dest->num_kcontrols; i++) {
+	for (i = 0; i < dest->num_kcontrols; i++) {	// 3个kcontrol
 		if (!strcmp(control_name, dest->kcontrol_news[i].name)) {
 			list_add(&path->list, &dapm->card->paths);
 			list_add(&path->list_sink, &dest->sources);
 			list_add(&path->list_source, &src->sinks);
-			path->name = dest->kcontrol_news[i].name;
+			path->name = dest->kcontrol_news[i].name;	// LINPUTX Switch
 			
 			// 通过读取指定寄存器来判断是否connect
 			dapm_set_path_status(dest, path, i);
