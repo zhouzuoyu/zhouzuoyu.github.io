@@ -24,7 +24,9 @@ Flash编程原理都是只能将1写为0，而不能将0写成1.
 2. nand flash：
 	nand flash只有一组数据线，不同容量的nand flash引脚基本一致，只需要在驱动中修改则可以兼容不同容量的flash。
 	使用ale/cle来表明现数据线上传输的是数据/命令/地址：
-	> 当CLE为高电平表示IO0-IO7传送的是命令；当ALE为高电平表示IO0-IO7传送的是地址；当ALE与CLE都为低电平的时候，表示IO0-IO7传送的是数据。
+	> 当CLE为高电平表示IO0-IO7传送的是命令；
+	> 当ALE为高电平表示IO0-IO7传送的是地址；
+	> 当ALE与CLE都为低电平的时候，表示IO0-IO7传送的是数据。
 
 ## 片内执行
 NOR的特点是芯片内执行（XIP, eXecute In Place），这样应用程序可以直接在flash闪存内运行，不必再把代码读到系统RAM中。
