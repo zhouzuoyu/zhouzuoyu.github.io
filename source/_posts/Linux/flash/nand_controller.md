@@ -3,7 +3,7 @@ title: nand(2)_controller
 date: 2018-02-5 12:00:00
 categories:
 - Linux
-- nand
+- flash
 ---
 
 # 源码

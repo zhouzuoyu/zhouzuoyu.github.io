@@ -1,9 +1,9 @@
 ---
-title: nor flash硬件连接
+title: nor_flash错位连接
 date: 2018-05-16 14:43:00
 categories:
 - Linux
-- nand
+- flash
 ---
 
 # 硬件错位连接

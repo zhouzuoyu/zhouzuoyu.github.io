@@ -3,7 +3,7 @@ title: nand(1)_overview
 date: 2018-02-5 12:00:00
 categories:
 - Linux
-- nand
+- flash
 ---
 
 nand驱动大概分为3部分
