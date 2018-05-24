@@ -11,13 +11,14 @@ categories:
 | 0         | MBR										| 256K		| Master Boot Record and GUID Partition Table	|
 | 1        	| preloader									| 256K		| First stage bootloader	|
 | 2        	| bootloader(u-boot.bin)					| 384K		| Second stage bootloader 	|
-| 3        	| misc										| 128K		| Second stage bootloader 	|
-| 4        	| recovery (zImage + recovery-ramdisk.img) 	| 8M		| Second stage bootloader	|
-| 5        	| boot (boot.img = zImage + ramdisk.img)	| 8M		| Second stage bootloader	|
-| 6        	| system (system.img)						| 256M		| Second stage bootloader	|
-| 7        	| cache (cache.img)							| 32M		| Second stage bootloader	|
-| 8        	| userdata (userdata.img)					| Remaining	| Second stage bootloader	|
+| 3        	| misc										| 128K		| Reserved.This partition can be used for internal purpose 	|
+| 4        	| recovery (zImage + recovery-ramdisk.img) 	| 8M		| recovery partition	|
+| 5        	| boot (boot.img = zImage + ramdisk.img)	| 8M		| Partition contains kernel + ramdisk images.	|
+| 6        	| system (system.img)						| 256M		| android file system	|
+| 7        	| cache (cache.img)							| 32M		| Partition will be used to store application cache	|
+| 8        	| userdata (userdata.img)					| Remaining	| Partition contains userdata supplied by oem vendor like configuration files,utilities etc..	|
 <!--more-->
+
 1. misc
 	这个分区包含各种复杂的类似于on/off的系统设置。这些设置可能是USB配置和某些硬件配置信息。这是一个重要的分区，如果该分区损坏或者丢失，设备的功能可能就工作不正常。
 2. cache
