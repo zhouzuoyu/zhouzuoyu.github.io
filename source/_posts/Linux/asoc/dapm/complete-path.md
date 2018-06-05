@@ -19,9 +19,18 @@ snd_soc_suspend
 ```
 <!--more-->
 ## is_connected_input_ep
-> 找snd_soc_dapm_dac||snd_soc_dapm_aif_in||snd_soc_dapm_input||snd_soc_dapm_vmid||snd_soc_dapm_mic||snd_soc_dapm_line
+> snd_soc_dapm_dac||snd_soc_dapm_aif_in||snd_soc_dapm_input||snd_soc_dapm_vmid||snd_soc_dapm_mic||snd_soc_dapm_line都属于input_ep
 ```c
 static int is_connected_input_ep(struct snd_soc_dapm_widget *widget)
+{
+	// snd_soc_dapm_dac||snd_soc_dapm_aif_in
+	switch (widget->id) {
+	case snd_soc_dapm_dac:
+	case snd_soc_dapm_aif_in:
+		if (widget->active)
+			// 声卡正常工作的情况下return 1，所以说snd_soc_dapm_dac||snd_soc_dapm_aif_in也是一类input_ep
+			return snd_soc_dapm_suspend_check(widget);
+	}
 	// 如果是snd_soc_dapm_input||snd_soc_dapm_vmid||snd_soc_dapm_mic||snd_soc_dapm_line且没有suspend，则return 1
 	if (widget->connected) {
 		/* connected pin ? */
@@ -46,13 +55,30 @@ static int is_connected_input_ep(struct snd_soc_dapm_widget *widget)
 			con += is_connected_input_ep(path->source);
 		}
 	}
-
+}
 ```
 
 ## is_connected_output_ep
-> 找snd_soc_dapm_adc||snd_soc_dapm_aif_out||snd_soc_dapm_output||snd_soc_dapm_hp||snd_soc_dapm_spk||snd_soc_dapm_line
+> snd_soc_dapm_adc||snd_soc_dapm_aif_out||snd_soc_dapm_output||snd_soc_dapm_hp||snd_soc_dapm_spk||snd_soc_dapm_line都属于output_ep
 ```c
 static int is_connected_output_ep(struct snd_soc_dapm_widget *widget)
+{
+	// snd_soc_dapm_adc||snd_soc_dapm_aif_out
+	switch (widget->id) {
+	case snd_soc_dapm_adc:
+	case snd_soc_dapm_aif_out:
+		if (widget->active)
+			return snd_soc_dapm_suspend_check(widget);
+				// 声卡正常工作的情况下return 1，所以说snd_soc_dapm_adc||snd_soc_dapm_aif_out也是一类output_ep
+				int level = snd_power_get_state(widget->dapm->card->snd_card);
+				switch (level) {
+				case SNDRV_CTL_POWER_D3hot:
+				case SNDRV_CTL_POWER_D3cold:
+					return widget->ignore_suspend;
+				default:
+					return 1;
+	}
+	
 	// snd_soc_dapm_output||snd_soc_dapm_hp||snd_soc_dapm_spk||snd_soc_dapm_line
 	if (widget->connected) {
 		/* connected pin ? */
@@ -75,4 +101,5 @@ static int is_connected_output_ep(struct snd_soc_dapm_widget *widget)
 			con += is_connected_output_ep(path->sink);
 		}
 	}
+}
 ```

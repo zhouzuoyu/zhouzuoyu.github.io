@@ -6,10 +6,11 @@ categories:
 - asoc
 - dapm
 ---
-
+# 源码
 > wm8960.c (linux-3.0.86\sound\soc\codecs)
 > soc-dapm.c (linux-3.0.86\sound\soc\codecs)
 
+# 注册widget和path
 先注册widget再添加route
 ```c
 static int wm8960_add_widgets(struct snd_soc_codec *codec)
@@ -18,8 +19,8 @@ static int wm8960_add_widgets(struct snd_soc_codec *codec)
 	snd_soc_dapm_add_routes(dapm, audio_paths, ARRAY_SIZE(audio_paths));
 ```
 <!--more-->
-# snd_soc_dapm_new_controls
-定义各种widget
+# widget
+## 定义
 ```c
 static const struct snd_soc_dapm_widget wm8960_dapm_widgets[] = {
 	SND_SOC_DAPM_INPUT("LINPUT1"),
@@ -27,7 +28,7 @@ static const struct snd_soc_dapm_widget wm8960_dapm_widgets[] = {
 };
 ```
 
-注册widgets
+## 注册
 ```c
 snd_soc_dapm_new_controls(dapm, wm8960_dapm_widgets, ARRAY_SIZE(wm8960_dapm_widgets));
 	for (i = 0; i < num; i++) {
@@ -38,10 +39,12 @@ snd_soc_dapm_new_controls(dapm, wm8960_dapm_widgets, ARRAY_SIZE(wm8960_dapm_widg
 		widget++;
 	}
 ```
-# snd_soc_dapm_add_routes
+
+# route
+## 定义
+声明使用哪些widget组成route
 > sink <- control <- source
 
-声明使用哪些widget组成route
 ```c
 static const struct snd_soc_dapm_route audio_paths[] = {
 	{ "Left Boost Mixer", "LINPUT1 Switch", "LINPUT1" }
@@ -49,8 +52,22 @@ static const struct snd_soc_dapm_route audio_paths[] = {
 };
 ```
 
-添加route
-通过widget可以找到path，再通过path找到source和sink
+## 注册
+将创建path，path有3个链表
+```c
+struct snd_soc_dapm_path {
+	struct list_head list_source;
+	struct list_head list_sink;
+	struct list_head list;
+};
+```
+如下使用，so任何一个widget都可以找到对应的path，从而找到source/sink
+```c
+list_add(&path->list, &dapm->card->paths);
+list_add(&path->list_sink, &wsink->sources);
+list_add(&path->list_source, &wsource->sinks);
+```
+
 ```c
 snd_soc_dapm_add_routes(dapm, audio_paths, ARRAY_SIZE(audio_paths));
 	for (i = 0; i < num; i++) {
@@ -72,7 +89,7 @@ snd_soc_dapm_add_routes(dapm, audio_paths, ARRAY_SIZE(audio_paths));
 				}
 			}
 			
-			// 创建并且init path
+			// 创建path
 			path = kzalloc(sizeof(struct snd_soc_dapm_path), GFP_KERNEL);
 			// 2. path中保存widget信息
 			path->source = wsource;
