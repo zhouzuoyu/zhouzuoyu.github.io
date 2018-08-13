@@ -10,7 +10,7 @@ categories:
 ![hexo_err](hexo安装/hexo_err.png)
 根据提示使用**npm install hexo \-\-save**不能解决问题。
 后面尝试更新node.js来解决问题。
-
+<!--more-->
 ## 更新node.js
 1. 
 参考这篇[Ubuntu16.04安装最新版nodejs（2018）](https://blog.csdn.net/well2049/article/details/79138045)，最后报错：
