@@ -1,5 +1,5 @@
 ---
-title: 格式化u盘
+title: ubuntu格式化u盘
 date: 2018-05-31 15:06:00
 categories:
 - Env
