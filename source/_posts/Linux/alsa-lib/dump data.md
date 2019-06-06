@@ -2,7 +2,8 @@
 title: dump alsa data
 date: 2019-04-23 10:13:00
 categories:
-- alsa
+- Linux
+- alsa-lib
 ---
 
 > 源码路径：src/pcm/pcm.c
