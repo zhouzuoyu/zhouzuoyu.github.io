@@ -92,7 +92,11 @@ NativeInputManager::NativeInputManager
 	sp<EventHub> eventHub = new EventHub();	// new
     mInputManager = new InputManager(eventHub, this, this);
 		mDispatcher = new InputDispatcher(dispatcherPolicy);
-	    mReader = new InputReader(eventHub, readerPolicy, mDispatcher);	// mDispatcher为mReader的listener
+	    mReader = new InputReader(eventHub, readerPolicy, mDispatcher);
+			InputReader::InputReader(const sp<EventHubInterface>& eventHub,
+					const sp<InputReaderPolicyInterface>& policy,
+					const sp<InputListenerInterface>& listener) :	// mReader的listener就是mDispatcher
+
 ```
 
 ### notifyKey

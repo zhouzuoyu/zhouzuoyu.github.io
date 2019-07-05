@@ -1,5 +1,5 @@
 ---
-title: uart示例
+title: uart app示例
 date: 2019-06-24 10:16:00
 categories:
 - Linux
