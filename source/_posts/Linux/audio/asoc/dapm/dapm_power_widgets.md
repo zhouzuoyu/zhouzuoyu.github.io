@@ -1,5 +1,5 @@
 ---
-title: 启动power_check
+title: dapm_power_widgets
 date: 2018-03-22 17:27:18
 categories:
 - Linux
@@ -7,8 +7,7 @@ categories:
 - dapm
 ---
 
-# 分析
-## soc_pcm_prepare
+# soc_pcm_prepare
 操作pcm设备时会调用soc_pcm_prepare
 ```c
 static int soc_new_pcm(struct snd_soc_pcm_runtime *rtd, int num)
@@ -28,8 +27,10 @@ static int soc_pcm_prepare(struct snd_pcm_substream *substream)
 					  SND_SOC_DAPM_STREAM_START);
 ```
 
-## snd_soc_dapm_stream_event
-对所有的widget都执行power_check，通过才会上电
+# dapm_power_widgets
+对所有的widget都执行power_check，通过上电，不通过下电
+需要上电的放到up_list，需要下电的放到down_list，然后操作相应的reg
+![power_widget](dapm_power_widgets/power_widget.png)
 ```c
 int snd_soc_dapm_stream_event(struct snd_soc_pcm_runtime *rtd,
 	const char *stream, int event)
@@ -52,7 +53,11 @@ int snd_soc_dapm_stream_event(struct snd_soc_pcm_runtime *rtd,
 							dapm_seq_run_coalesced(cur_dapm, &pending);
 								reg = list_first_entry(pending, struct snd_soc_dapm_widget,
 										       power_list)->reg;
-								snd_soc_update_bits(dapm->codec, reg, mask, value);	// 更新reg
+								if (w->power)
+									value |= w->on_val << w->shift;	// widget定义中会设置on_val
+								else
+									value |= w->off_val << w->shift;
+								snd_soc_update_bits(dapm->codec, reg, mask, value);	// 操作reg
 					}
 			}
 ```

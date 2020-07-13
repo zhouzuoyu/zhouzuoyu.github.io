@@ -12,6 +12,7 @@ categories:
 
 # 注册widget和path
 先注册widget再添加route
+因为创建path需要widget的支撑
 ```c
 static int wm8960_add_widgets(struct snd_soc_codec *codec)
 	snd_soc_dapm_new_controls(dapm, wm8960_dapm_widgets,
@@ -27,8 +28,20 @@ static const struct snd_soc_dapm_widget wm8960_dapm_widgets[] = {
 	...
 };
 ```
+mixer类型的widget必然有switch
+```c
+static const struct snd_kcontrol_new wm8960_lin_boost[] = {
+	SOC_DAPM_SINGLE("LINPUT2 Switch", WM8960_LINPATH, 6, 1, 0),
+	SOC_DAPM_SINGLE("LINPUT3 Switch", WM8960_LINPATH, 7, 1, 0),
+	SOC_DAPM_SINGLE("LINPUT1 Switch", WM8960_LINPATH, 8, 1, 0),	// WM8960_LINPATH reg的第8位决定开关的状态
+};
+SND_SOC_DAPM_MIXER("Left Boost Mixer", WM8960_POWER1, 5, 0,
+		   wm8960_lin_boost, ARRAY_SIZE(wm8960_lin_boost)),
+```
 
 ## 注册
+只是添加到dapm->card->widgets中，创建声卡的时候会遍历它进行相应的处理
+![widget_route](widget_route/add_widget.png)
 ```c
 snd_soc_dapm_new_controls(dapm, wm8960_dapm_widgets, ARRAY_SIZE(wm8960_dapm_widgets));
 	for (i = 0; i < num; i++) {
@@ -38,6 +51,50 @@ snd_soc_dapm_new_controls(dapm, wm8960_dapm_widgets, ARRAY_SIZE(wm8960_dapm_widg
 			w->connected = 1;
 		widget++;
 	}
+```
+
+## process
+主要是创建里面的kcontrol
+```c
+snd_soc_dapm_new_widgets
+	list_for_each_entry(w, &card->widgets, list)
+	{
+		if (w->num_kcontrols) {
+			w->kcontrols = kzalloc(w->num_kcontrols *
+						sizeof(struct snd_kcontrol *),
+						GFP_KERNEL);
+		}
+
+		switch(w->id) {
+		case snd_soc_dapm_switch:
+		case snd_soc_dapm_mixer:
+		case snd_soc_dapm_mixer_named_ctl:
+			dapm_new_mixer(w);	// 主要是创建里面的kcontrol
+				for (i = 0; i < w->num_kcontrols; i++) {
+					ret = dapm_create_or_share_kcontrol(w, i);
+						snd_soc_cnew(&w->kcontrol_news[kci], NULL, name, prefix);
+						ret = snd_ctl_add(card, kcontrol);
+				}
+
+			break;
+		case snd_soc_dapm_mux:
+		case snd_soc_dapm_demux:
+			dapm_new_mux(w);
+			break;
+		case snd_soc_dapm_pga:
+		case snd_soc_dapm_out_drv:
+			dapm_new_pga(w);
+			break;
+		case snd_soc_dapm_dai_link:
+			dapm_new_dai_link(w);
+			break;
+		default:
+			break;
+		}
+
+		dapm_mark_dirty(w, "new widget");
+	}
+	dapm_power_widgets(card, SND_SOC_DAPM_STREAM_NOP);
 ```
 
 # route
@@ -61,20 +118,28 @@ struct snd_soc_dapm_path {
 	struct list_head list;
 };
 ```
-如下使用，so任何一个widget都可以找到对应的path，从而找到source/sink
+任何一个widget都可以找到对应的path，从而找到source/sink
 ```c
 list_add(&path->list, &dapm->card->paths);
 list_add(&path->list_sink, &wsink->sources);
 list_add(&path->list_source, &wsource->sinks);
 ```
 
+1. 根据route创建path
+2. 设置path->connect
+    2.1 NULL：直连
+    2.2 其他需要读取reg来判断
+![widget_route](widget_route/add_path.png)
 ```c
 snd_soc_dapm_add_routes(dapm, audio_paths, ARRAY_SIZE(audio_paths));
 	for (i = 0; i < num; i++) {
 		ret = snd_soc_dapm_add_route(dapm, route);
 			sink = route->sink;
 			source = route->source;
-			// 通过name在dapm->card->widgets链表中搜索，将结果保存到wsink和wsource中
+			/* 
+			 * 通过name在dapm->card->widgets链表中搜索，将结果保存到wsink和wsource中
+			 * 因为route中定义的只是字符串而已，需要widget的支撑
+			 */
 			list_for_each_entry(w, &dapm->card->widgets, list) {
 				if (!wsink && !(strcmp(w->name, sink))) {
 					wtsink = w;
@@ -96,8 +161,8 @@ snd_soc_dapm_add_routes(dapm, audio_paths, ARRAY_SIZE(audio_paths));
 			path->sink = wsink;
 			path->connected = route->connected;
 			
-			// { "Left Input Mixer", NULL, "LINPUT1", }: 直连
-			if (control == NULL) {
+			// { "Left Input Mixer", NULL, "LINPUT1", }
+			if (control == NULL) {	// NULL: 直连
 				list_add(&path->list, &dapm->card->paths);
 				// 1. widget中保存path信息
 				list_add(&path->list_sink, &wsink->sources);
@@ -153,17 +218,7 @@ snd_soc_dapm_add_routes(dapm, audio_paths, ARRAY_SIZE(audio_paths));
 	}
 ```
 
-## snd_soc_dapm_mixer
-mixer类型的widget必然有多个switch
-```c
-static const struct snd_kcontrol_new wm8960_lin_boost[] = {
-	SOC_DAPM_SINGLE("LINPUT2 Switch", WM8960_LINPATH, 6, 1, 0),
-	SOC_DAPM_SINGLE("LINPUT3 Switch", WM8960_LINPATH, 7, 1, 0),
-	SOC_DAPM_SINGLE("LINPUT1 Switch", WM8960_LINPATH, 8, 1, 0),	// WM8960_LINPATH reg的第8位决定开关的状态
-};
-SND_SOC_DAPM_MIXER("Left Boost Mixer", WM8960_POWER1, 5, 0,
-		   wm8960_lin_boost, ARRAY_SIZE(wm8960_lin_boost)),
-```
+读取寄存器进行判断这个path是否connect
 ```c
 dapm_connect_mixer
 	for (i = 0; i < dest->num_kcontrols; i++) {	// 3个kcontrol

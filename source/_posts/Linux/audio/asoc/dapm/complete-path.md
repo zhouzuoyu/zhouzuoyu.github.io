@@ -9,6 +9,8 @@ categories:
 
 # 导言
 搜寻指定widget是否在complete path上
+1. 该widget往前遍历(path->connect)能找到input_ep
+2. 该widget往后遍历能找到output_ep
 
 # 分析
 设置card->power_state
@@ -18,8 +20,16 @@ snd_soc_suspend
 		card->power_state = state;
 ```
 <!--more-->
+## power check流程
+![complete-path](complete-path/power_check.png)
 ## is_connected_input_ep
-> snd_soc_dapm_dac||snd_soc_dapm_aif_in||snd_soc_dapm_input||snd_soc_dapm_vmid||snd_soc_dapm_mic||snd_soc_dapm_line都属于input_ep
+|  input_ep |
+|  ----  |
+| snd_soc_dapm_mic |
+| snd_soc_dapm_input |
+| snd_soc_dapm_vmid |
+| snd_soc_dapm_siggen |
+
 ```c
 static int is_connected_input_ep(struct snd_soc_dapm_widget *widget)
 {
@@ -59,7 +69,13 @@ static int is_connected_input_ep(struct snd_soc_dapm_widget *widget)
 ```
 
 ## is_connected_output_ep
-> snd_soc_dapm_adc||snd_soc_dapm_aif_out||snd_soc_dapm_output||snd_soc_dapm_hp||snd_soc_dapm_spk||snd_soc_dapm_line都属于output_ep
+|  output_ep |
+|  ----  |
+| snd_soc_dapm_spk |
+| snd_soc_dapm_hp |
+| snd_soc_dapm_output |
+| snd_soc_dapm_sink |
+
 ```c
 static int is_connected_output_ep(struct snd_soc_dapm_widget *widget)
 {
