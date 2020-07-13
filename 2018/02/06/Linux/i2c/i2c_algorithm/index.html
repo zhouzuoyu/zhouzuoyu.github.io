@@ -1,0 +1,871 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=6.0.2" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=6.0.2">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=6.0.2">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=6.0.2">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=6.0.2" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '6.0.2',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  
+  <meta name="keywords" content="Hexo, NexT">
+
+
+<meta name="description" content="源码 linux-3.0.86\drivers\i2c\busses\i2c-s3c2410.c  功能i2c协议是通用的，kernel中已经实现，但是各个厂商的i2c controller各不相同，所以需要填充差异部分主要是要填充i2c_algorithm-&amp;gt;master_xfer">
+<meta property="og:type" content="article">
+<meta property="og:title" content="i2c(3)_algorithm">
+<meta property="og:url" content="http://zhouzuoyu.github.io/2018/02/06/Linux/i2c/i2c_algorithm/index.html">
+<meta property="og:site_name" content="千里之行始于足下">
+<meta property="og:description" content="源码 linux-3.0.86\drivers\i2c\busses\i2c-s3c2410.c  功能i2c协议是通用的，kernel中已经实现，但是各个厂商的i2c controller各不相同，所以需要填充差异部分主要是要填充i2c_algorithm-&amp;gt;master_xfer">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2019-12-05T06:40:38.307Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="i2c(3)_algorithm">
+<meta name="twitter:description" content="源码 linux-3.0.86\drivers\i2c\busses\i2c-s3c2410.c  功能i2c协议是通用的，kernel中已经实现，但是各个厂商的i2c controller各不相同，所以需要填充差异部分主要是要填充i2c_algorithm-&amp;gt;master_xfer">
+
+
+
+
+
+
+  <link rel="canonical" href="http://zhouzuoyu.github.io/2018/02/06/Linux/i2c/i2c_algorithm/">
+
+
+  <title>i2c(3)_algorithm | 千里之行始于足下</title>
+  
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"> <div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">千里之行始于足下</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-home"></i> <br>首页</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-th"></i> <br>分类</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>归档</a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+  
+
+
+
+ </div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://zhouzuoyu.github.io/2018/02/06/Linux/i2c/i2c_algorithm/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="zhouzuoyu">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="千里之行始于足下">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">i2c(3)_algorithm</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-02-06T12:00:00+08:00">2018-02-06</time>
+            
+
+            
+            
+
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/Linux/" itemprop="url" rel="index"><span itemprop="name">Linux</span></a></span>
+
+                
+                
+                  ， 
+                
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/Linux/i2c/" itemprop="url" rel="index"><span itemprop="name">i2c</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2018/02/06/Linux/i2c/i2c_algorithm/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2018/02/06/Linux/i2c/i2c_algorithm/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="源码"><a href="#源码" class="headerlink" title="源码"></a>源码</h2><blockquote>
+<p>linux-3.0.86\drivers\i2c\busses\i2c-s3c2410.c</p>
+</blockquote>
+<h2 id="功能"><a href="#功能" class="headerlink" title="功能"></a>功能</h2><p>i2c协议是通用的，kernel中已经实现，但是各个厂商的i2c controller各不相同，所以需要填充差异部分<br>主要是要填充i2c_algorithm-&gt;master_xfer<br><a id="more"></a></p>
+<h2 id="源码分析"><a href="#源码分析" class="headerlink" title="源码分析"></a>源码分析</h2><p>注册i2c_algorithm<br><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">static</span> u32 <span class="title">s3c24xx_i2c_func</span><span class="params">(struct i2c_adapter *adap)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">return</span> I2C_FUNC_I2C | I2C_FUNC_SMBUS_EMUL | I2C_FUNC_NOSTART |</span><br><span class="line">        I2C_FUNC_PROTOCOL_MANGLING;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// algorithm</span></span><br><span class="line"><span class="keyword">static</span> <span class="keyword">const</span> <span class="class"><span class="keyword">struct</span> <span class="title">i2c_algorithm</span> <span class="title">s3c24xx_i2c_algorithm</span> = &#123;</span></span><br><span class="line">    .master_xfer		= s3c24xx_i2c_xfer,</span><br><span class="line">    .functionality		= s3c24xx_i2c_func,</span><br><span class="line">&#125;;</span><br><span class="line">s3c24xx_i2c_probe</span><br><span class="line">    i2c-&gt;adap.algo = &amp;s3c24xx_i2c_algorithm;	<span class="comment">// i2c_algorithm挂接在i2c_adapter上</span></span><br><span class="line">    devm_request_irq(&amp;pdev-&gt;dev, i2c-&gt;irq, s3c24xx_i2c_irq, <span class="number">0</span>, dev_name(&amp;pdev-&gt;dev), i2c);	<span class="comment">// register interrupt</span></span><br></pre></td></tr></table></figure></p>
+<p>i2c传输有两种方式：<br>    1：polling<br>     2：interrupt，IICDS数据传输完毕则产生一次中断<br>    以下分析interrupt方式：s3c24xx_i2c_xfer作为启动(S3C2410_IICSTAT_START)，后续的传输通过interrupt来完成</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/*</span></span><br><span class="line"><span class="comment"> * 1. Write own slave address on IICADD register, if needed.</span></span><br><span class="line"><span class="comment">   2. Set IICCON register.</span></span><br><span class="line"><span class="comment">	a) Enable interrupt</span></span><br><span class="line"><span class="comment">	b) Define SCL period</span></span><br><span class="line"><span class="comment">   3. Set IICSTAT to enable Serial Output</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line">&#123; .compatible = <span class="string">"samsung,s3c2440-i2c"</span>, .data = (<span class="keyword">void</span> *)QUIRK_S3C2440 &#125;,	<span class="comment">// Not polling</span></span><br><span class="line">s3c24xx_i2c_xfer</span><br><span class="line">    <span class="keyword">for</span> (retry = <span class="number">0</span>; retry &lt; adap-&gt;retries; retry++)	<span class="comment">// 可以做指定次数retry</span></span><br><span class="line">        s3c24xx_i2c_doxfer(i2c, msgs, num);</span><br><span class="line">            i2c-&gt;msg     = msgs;	<span class="comment">// i2c device设置</span></span><br><span class="line">            i2c-&gt;msg_num = num;</span><br><span class="line">            i2c-&gt;msg_ptr = <span class="number">0</span>;</span><br><span class="line">            i2c-&gt;msg_idx = <span class="number">0</span>;</span><br><span class="line">            i2c-&gt;state   = STATE_START;	<span class="comment">// 1st: STATE_START</span></span><br><span class="line">            <span class="comment">// 使能中断</span></span><br><span class="line">            s3c24xx_i2c_enable_irq(i2c);</span><br><span class="line">                <span class="comment">// set IICCON[5]: Tx/Rx Interrupt</span></span><br><span class="line">                tmp = readl(i2c-&gt;regs + S3C2410_IICCON);</span><br><span class="line">                writel(tmp | S3C2410_IICCON_IRQEN, i2c-&gt;regs + S3C2410_IICCON);</span><br><span class="line">            <span class="comment">//</span></span><br><span class="line">            s3c24xx_i2c_message_start(i2c, msgs);</span><br><span class="line">                <span class="comment">// Refer to Operations for Master/Transmitter Mode</span></span><br><span class="line">                stat |=  S3C2410_IICSTAT_TXRXEN;		<span class="comment">// 1&lt;&lt;4: Enable Rx/Tx</span></span><br><span class="line">                <span class="keyword">unsigned</span> <span class="keyword">int</span> addr = (msg-&gt;addr &amp; <span class="number">0x7f</span>) &lt;&lt; <span class="number">1</span>;	<span class="comment">// 左移</span></span><br><span class="line">                <span class="comment">// 最低位为读写位 写为0读为1</span></span><br><span class="line">                <span class="keyword">if</span> (msg-&gt;flags &amp; I2C_M_RD) &#123;</span><br><span class="line">                    <span class="comment">// RX则|=1</span></span><br><span class="line">                    stat |= S3C2410_IICSTAT_MASTER_RX;</span><br><span class="line">                    addr |= <span class="number">1</span>;</span><br><span class="line">                &#125; <span class="keyword">else</span></span><br><span class="line">                    stat |= S3C2410_IICSTAT_MASTER_TX;	<span class="comment">// 3&lt;&lt;6: Master transmit mode</span></span><br><span class="line">            </span><br><span class="line">                <span class="comment">// Enable i2c controller</span></span><br><span class="line">                writel(stat, i2c-&gt;regs + S3C2410_IICSTAT);	<span class="comment">// IICSTAT: 1&lt;&lt;4 | 1&lt;&lt;5 | 3&lt;&lt;6</span></span><br><span class="line">                <span class="comment">// Write addr</span></span><br><span class="line">                writeb(addr, i2c-&gt;regs + S3C2410_IICDS);	<span class="comment">// IICDS: i2c_addr</span></span><br><span class="line">                <span class="comment">// START</span></span><br><span class="line">                stat |= S3C2410_IICSTAT_START;	<span class="comment">// 1&lt;&lt;5: START signal generation.</span></span><br><span class="line">                writel(stat, i2c-&gt;regs + S3C2410_IICSTAT);	<span class="comment">// IICSTAT: 1&lt;&lt;5</span></span><br></pre></td></tr></table></figure>
+<p>中断处理函数<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line">// ISR</span><br><span class="line">s3c24xx_i2c_irq</span><br><span class="line">    i2c_s3c_irq_nextbyte(i2c, status);</span><br><span class="line">        i2c-&gt;state = STATE_WRITE;	// 2nd: STATE_WRITE</span><br><span class="line">        /*</span><br><span class="line">         * 可能需要传输多个msg(i2c-&gt;msg_num)，每个msg有多个byte(i2c-&gt;msg-&gt;len)</span><br><span class="line">         * 先检查该msg是否传输完毕</span><br><span class="line">         * 再检查全部msg是否传输完毕</span><br><span class="line">         * 两者都传输完毕则stop</span><br><span class="line">         */</span><br><span class="line">        if (!is_msgend(i2c)) &#123;	// return i2c-&gt;msg_ptr &gt;= i2c-&gt;msg-&gt;len;	len: 该msg有几个byte</span><br><span class="line">            // 传输完该msg</span><br><span class="line">            byte = i2c-&gt;msg-&gt;buf[i2c-&gt;msg_ptr++];</span><br><span class="line">            writeb(byte, i2c-&gt;regs + S3C2410_IICDS);</span><br><span class="line">        &#125; else if (!is_lastmsg(i2c)) &#123;	// i2c-&gt;msg_idx &gt;= (i2c-&gt;msg_num - 1);	几个msg</span><br><span class="line">            // 传输下一个msg</span><br><span class="line">            i2c-&gt;msg_ptr = 0;</span><br><span class="line">            i2c-&gt;msg_idx++;</span><br><span class="line">            i2c-&gt;msg++;</span><br><span class="line"></span><br><span class="line">            /* send the new start */</span><br><span class="line">            s3c24xx_i2c_message_start(i2c, i2c-&gt;msg);</span><br><span class="line">            i2c-&gt;state = STATE_START;</span><br><span class="line">        &#125; else &#123;</span><br><span class="line">            /* send stop */</span><br><span class="line">            s3c24xx_i2c_stop(i2c, 0);</span><br><span class="line">        &#125;</span><br></pre></td></tr></table></figure></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/02/06/Linux/i2c/i2c_bus_type/" rel="next" title="i2c(4)_i2c_bus_type">
+                <i class="fa fa-chevron-left"></i> i2c(4)_i2c_bus_type
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/02/06/Linux/i2c/i2c_adapter/" rel="prev" title="i2c(2)_adapter">
+                i2c(2)_adapter <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+    </div>
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="/images/avatar.jpg" alt="zhouzuoyu">
+            
+              <p class="site-author-name" itemprop="name">zhouzuoyu</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">148</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">40</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+            </nav>
+          
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="mailto:hi@zhouzuoyu.com" target="_blank" title="E-Mail">
+                      
+                        <i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#源码"><span class="nav-number">1.</span> <span class="nav-text">源码</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#功能"><span class="nav-number">2.</span> <span class="nav-text">功能</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#源码分析"><span class="nav-number">3.</span> <span class="nav-text">源码分析</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">zhouzuoyu</span>
+
+  
+
+  
+</div>
+
+
+
+
+
+
+
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.0.2"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.0.2"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.0.2"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.0.2"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.0.2"></script>
+
+
+
+  
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+  <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+  <script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+  
+  <script type="text/javascript">
+    var GUEST = ['nick','mail','link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(item=>{
+      return GUEST.indexOf(item)>-1;
+    });
+    new Valine({
+        el: '#comments' ,
+        verify: false,
+        notify: false,
+        appId: 's0qrr1SUElrMtB7IkHDhyquu-gzGzoHsz',
+        appKey: 'rzVUQV27Lo9pBzD6UvCMAzR6',
+        placeholder: 'Just go go',
+        avatar:'mm',
+        guest_info:guest,
+        pageSize:'10' || 10,
+    });
+  </script>
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+<script>
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

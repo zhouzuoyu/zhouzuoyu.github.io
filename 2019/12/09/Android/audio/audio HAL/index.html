@@ -1,0 +1,880 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=6.0.2" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=6.0.2">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=6.0.2">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=6.0.2">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=6.0.2" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '6.0.2',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  
+  <meta name="keywords" content="Hexo, NexT">
+
+
+<meta name="description" content="HAL代码结构 hardware\libhardware_legacy\audio\Audio_hw_hal.cpp 框架代码，给上层提供统一的接口 device\friendly-arm\common\libaudio\AudioHardware.cpp 具体的hal实现代码  HAL代码分析 load so文件 通过步骤1得到outputStream 通过步骤2操作pcm流">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Audio HAL">
+<meta property="og:url" content="http://zhouzuoyu.github.io/2019/12/09/Android/audio/audio HAL/index.html">
+<meta property="og:site_name" content="千里之行始于足下">
+<meta property="og:description" content="HAL代码结构 hardware\libhardware_legacy\audio\Audio_hw_hal.cpp 框架代码，给上层提供统一的接口 device\friendly-arm\common\libaudio\AudioHardware.cpp 具体的hal实现代码  HAL代码分析 load so文件 通过步骤1得到outputStream 通过步骤2操作pcm流">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2020-07-10T08:01:54.165Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Audio HAL">
+<meta name="twitter:description" content="HAL代码结构 hardware\libhardware_legacy\audio\Audio_hw_hal.cpp 框架代码，给上层提供统一的接口 device\friendly-arm\common\libaudio\AudioHardware.cpp 具体的hal实现代码  HAL代码分析 load so文件 通过步骤1得到outputStream 通过步骤2操作pcm流">
+
+
+
+
+
+
+  <link rel="canonical" href="http://zhouzuoyu.github.io/2019/12/09/Android/audio/audio HAL/">
+
+
+  <title>Audio HAL | 千里之行始于足下</title>
+  
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"> <div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">千里之行始于足下</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-home"></i> <br>首页</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-th"></i> <br>分类</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>归档</a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+  
+
+
+
+ </div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://zhouzuoyu.github.io/2019/12/09/Android/audio/audio HAL/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="zhouzuoyu">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="千里之行始于足下">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Audio HAL</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-12-09T13:50:00+08:00">2019-12-09</time>
+            
+
+            
+            
+
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/Android/" itemprop="url" rel="index"><span itemprop="name">Android</span></a></span>
+
+                
+                
+                  ， 
+                
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/Android/audio/" itemprop="url" rel="index"><span itemprop="name">audio</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2019/12/09/Android/audio/audio HAL/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2019/12/09/Android/audio/audio HAL/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="HAL代码结构"><a href="#HAL代码结构" class="headerlink" title="HAL代码结构"></a>HAL代码结构</h1><ol>
+<li>hardware\libhardware_legacy\audio\Audio_hw_hal.cpp<br> 框架代码，给上层提供统一的接口</li>
+<li>device\friendly-arm\common\libaudio\AudioHardware.cpp<br> 具体的hal实现代码</li>
+</ol>
+<h1 id="HAL代码分析"><a href="#HAL代码分析" class="headerlink" title="HAL代码分析"></a>HAL代码分析</h1><ol>
+<li>load so文件</li>
+<li>通过步骤1得到outputStream</li>
+<li>通过步骤2操作pcm流<a id="more"></a></li>
+</ol>
+<h2 id="APM-loadHwModule"><a href="#APM-loadHwModule" class="headerlink" title="APM loadHwModule"></a>APM loadHwModule</h2><p>APM的构造函数会调用HAL的open函数：APM mpClientInterface-&gt;loadHwModule(mHwModules[i]-&gt;mName)<br><strong>HAL会把构建的legacy_audio_device.audio_hw_device返回给上层</strong><br>上层可以利用这个audio_hw_device得到legacy_audio_device，可以得到AudioHardwareInterface，从而可以操控硬件<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">legacy_audio_device</span> &#123;</span></span><br><span class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">audio_hw_device</span> <span class="title">device</span>;</span>			<span class="comment">// 返回给上层</span></span><br><span class="line"></span><br><span class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">AudioHardwareInterface</span> *<span class="title">hwif</span>;</span>	<span class="comment">// 厂家提供的实现函数</span></span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure></p>
+<p><strong>这个结构体很关键，因为其中的成员audio_hw_device会返回给上层，从而可以操作硬件</strong></p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">static</span> <span class="class"><span class="keyword">struct</span> <span class="title">hw_module_methods_t</span> <span class="title">legacy_audio_module_methods</span> = &#123;</span></span><br><span class="line">        open: legacy_adev_open</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">legacy_audio_module</span> <span class="title">HAL_MODULE_INFO_SYM</span> = &#123;</span></span><br><span class="line">    <span class="keyword">module</span>: &#123;</span><br><span class="line">        common: &#123;</span><br><span class="line">            tag: HARDWARE_MODULE_TAG,</span><br><span class="line">            module_api_version: AUDIO_MODULE_API_VERSION_0_1,</span><br><span class="line">            hal_api_version: HARDWARE_HAL_API_VERSION,</span><br><span class="line">            id: AUDIO_HARDWARE_MODULE_ID,</span><br><span class="line">            name: <span class="string">"LEGACY Audio HW HAL"</span>,</span><br><span class="line">            methods: &amp;legacy_audio_module_methods,</span><br><span class="line">        &#125;,</span><br><span class="line">    &#125;,</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">int</span> <span class="title">legacy_adev_open</span><span class="params">(<span class="keyword">const</span> <span class="keyword">hw_module_t</span>* <span class="keyword">module</span>, <span class="keyword">const</span> <span class="keyword">char</span>* name,</span></span></span><br><span class="line"><span class="function"><span class="params">                            <span class="keyword">hw_device_t</span>** device)</span>	<span class="comment">// 输出型参数</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">legacy_audio_device</span> *<span class="title">ladev</span>;</span></span><br><span class="line">    ladev = (struct legacy_audio_device *)<span class="built_in">calloc</span>(<span class="number">1</span>, <span class="keyword">sizeof</span>(*ladev));	<span class="comment">// 构建legacy_audio_device</span></span><br><span class="line">    ladev-&gt;device.open_output_stream = adev_open_output_stream;</span><br><span class="line">    *device = &amp;ladev-&gt;device.common;	<span class="comment">// 把构建legacy_audio_device.audio_hw_device返回给上层</span></span><br><span class="line"></span><br><span class="line">    ladev-&gt;hwif = createAudioHardware();	<span class="comment">// 厂家的实现函数</span></span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">new</span> AudioHardware();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="APM-openOutput"><a href="#APM-openOutput" class="headerlink" title="APM openOutput"></a>APM openOutput</h2><p>legacy_stream_out中包含两类结构体audio_stream_out和AudioStreamOut<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">legacy_stream_out</span> &#123;</span></span><br><span class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">audio_stream_out</span> <span class="title">stream</span>;</span>	<span class="comment">// 返回给上层</span></span><br><span class="line"></span><br><span class="line">    AudioStreamOut *legacy_out;		<span class="comment">// 厂家提供：audioHardware.cpp</span></span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure></p>
+<p><strong>APM的openOutput将会调用HAL的open_output_stream，返回audio_stream_out，上层拿到这个结构体可以操作pcm流</strong><br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">int</span> <span class="title">adev_open_output_stream</span><span class="params">(struct audio_hw_device *dev,</span></span></span><br><span class="line"><span class="function"><span class="params">                                   <span class="keyword">audio_io_handle_t</span> handle,</span></span></span><br><span class="line"><span class="function"><span class="params">                                   <span class="keyword">audio_devices_t</span> devices,</span></span></span><br><span class="line"><span class="function"><span class="params">                                   <span class="keyword">audio_output_flags_t</span> flags,</span></span></span><br><span class="line"><span class="function"><span class="params">                                   struct audio_config *config,</span></span></span><br><span class="line"><span class="function"><span class="params">                                   struct audio_stream_out **stream_out,	<span class="comment">// 输出型参数</span></span></span></span><br><span class="line"><span class="function"><span class="params">                                   <span class="keyword">const</span> <span class="keyword">char</span> *address __unused)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    out = (struct legacy_stream_out *)<span class="built_in">calloc</span>(<span class="number">1</span>, <span class="keyword">sizeof</span>(*out));</span><br><span class="line"></span><br><span class="line">    out-&gt;legacy_out = ladev-&gt;hwif-&gt;openOutputStreamWithFlags(devices, flags,</span><br><span class="line">                                                    (<span class="keyword">int</span> *) &amp;config-&gt;format,</span><br><span class="line">                                                    &amp;config-&gt;channel_mask,</span><br><span class="line">                                                    &amp;config-&gt;sample_rate, &amp;status);</span><br><span class="line">        <span class="keyword">return</span> openOutputStream(devices, format, channels, sampleRate, status);	<span class="comment">// AudioHardware::openOutputStream</span></span><br><span class="line">            out = <span class="keyword">new</span> AudioStreamOutALSA();</span><br><span class="line">            rc = out-&gt;<span class="built_in">set</span>(<span class="keyword">this</span>, devices, format, channels, sampleRate);</span><br><span class="line">            <span class="keyword">return</span> out.get();</span><br><span class="line"></span><br><span class="line">    out-&gt;stream.write = out_write;</span><br><span class="line"></span><br><span class="line">    *stream_out = &amp;out-&gt;stream;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">static</span> ssize_t <span class="title">out_write</span><span class="params">(struct audio_stream_out *stream, <span class="keyword">const</span> <span class="keyword">void</span>* buffer,</span></span></span><br><span class="line"><span class="function"><span class="params">                         <span class="keyword">size_t</span> bytes)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">legacy_stream_out</span> *<span class="title">out</span> =</span></span><br><span class="line"><span class="class">        <span class="title">reinterpret_cast</span>&lt;struct legacy_stream_out *&gt;(<span class="title">stream</span>);</span>	<span class="comment">// 根据小结构体得到大结构体，从而可以获取到audioHardware</span></span><br><span class="line">    <span class="keyword">return</span> out-&gt;legacy_out-&gt;write(buffer, bytes);	<span class="comment">// AudioHardware::AudioStreamOutALSA::write</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h2 id="PlaybackThread-write"><a href="#PlaybackThread-write" class="headerlink" title="PlaybackThread write"></a>PlaybackThread write</h2><p>将调用AudioHardware::AudioStreamOutALSA::write</p>
+<p>第一次write时将调用open函数，打开对应驱动设备<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">status_t</span> AudioHardware::AudioStreamOutALSA::open_l()</span><br><span class="line">&#123;</span><br><span class="line">    mPcm = mHardware-&gt;openPcmOut_l();</span><br><span class="line">        <span class="class"><span class="keyword">struct</span> <span class="title">pcm_config</span> <span class="title">config</span> = &#123;</span></span><br><span class="line">            channels : <span class="number">2</span>,</span><br><span class="line">            rate : AUDIO_HW_OUT_SAMPLERATE,</span><br><span class="line">            period_size : AUDIO_HW_OUT_PERIOD_SZ,</span><br><span class="line">            period_count : AUDIO_HW_OUT_PERIOD_CNT,</span><br><span class="line">            format : PCM_FORMAT_S16_LE,</span><br><span class="line">            start_threshold : <span class="number">0</span>,</span><br><span class="line">            stop_threshold : <span class="number">0</span>,</span><br><span class="line">            silence_threshold : <span class="number">0</span>,</span><br><span class="line">        &#125;;</span><br><span class="line">        mPcm = pcm_open(<span class="number">0</span>, <span class="number">0</span>, flags, &amp;config);	<span class="comment">// tinyalsa的接口，Card 0, Device 0</span></span><br><span class="line">        <span class="keyword">return</span> mPcm;</span><br><span class="line"></span><br><span class="line">    mMixer = mHardware-&gt;openMixer_l();</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 设置通路：根据mDevices设置不同的kctl</span></span><br><span class="line">    <span class="keyword">const</span> AudioMixer *mixer = mHardware-&gt;getOutputRouteFromDevice(mDevices);</span><br><span class="line">    <span class="keyword">for</span>(<span class="keyword">int</span> cnt = <span class="number">0</span> ; <span class="literal">NULL</span> != mixer[cnt].ctl ; ++cnt)&#123;</span><br><span class="line">        mRouteCtl = mixer_get_ctl_by_name(mMixer, mixer[cnt].ctl);</span><br><span class="line">        <span class="keyword">if</span> (<span class="literal">NULL</span> != mRouteCtl) &#123;</span><br><span class="line">            <span class="keyword">for</span> (<span class="keyword">unsigned</span> <span class="keyword">int</span> idx = <span class="number">0</span> ; mixer_ctl_get_num_values(mRouteCtl) &gt; idx ; ++idx)</span><br><span class="line">                mixer_ctl_set_value(mRouteCtl, idx, mixer[cnt].val);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>调用pcm_write<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">ssize_t</span> AudioHardware::AudioStreamOutALSA::write(<span class="keyword">const</span> <span class="keyword">void</span>* buffer, <span class="keyword">size_t</span> bytes)</span><br><span class="line">&#123;</span><br><span class="line">    <span class="keyword">const</span> <span class="keyword">uint8_t</span>* p = <span class="keyword">static_cast</span>&lt;<span class="keyword">const</span> <span class="keyword">uint8_t</span>*&gt;(buffer);</span><br><span class="line">    <span class="comment">// 第一次open</span></span><br><span class="line">    <span class="keyword">if</span> (mStandby) &#123;</span><br><span class="line">        open_l();</span><br><span class="line">        mStandby = <span class="literal">false</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    ret = pcm_write(mPcm,(<span class="keyword">void</span>*) p, bytes);		<span class="comment">// 调用tinyalsa的接口</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2019/12/09/Android/audio/AudioFlinger_startup_seq/" rel="next" title="AudioFlinge启动流程">
+                <i class="fa fa-chevron-left"></i> AudioFlinge启动流程
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2019/12/09/Android/audio/availableOutputDeviceTypes/" rel="prev" title="availableOutputDeviceTypes">
+                availableOutputDeviceTypes <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+    </div>
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="/images/avatar.jpg" alt="zhouzuoyu">
+            
+              <p class="site-author-name" itemprop="name">zhouzuoyu</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">148</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">40</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+            </nav>
+          
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="mailto:hi@zhouzuoyu.com" target="_blank" title="E-Mail">
+                      
+                        <i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#HAL代码结构"><span class="nav-number">1.</span> <span class="nav-text">HAL代码结构</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#HAL代码分析"><span class="nav-number">2.</span> <span class="nav-text">HAL代码分析</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#APM-loadHwModule"><span class="nav-number">2.1.</span> <span class="nav-text">APM loadHwModule</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#APM-openOutput"><span class="nav-number">2.2.</span> <span class="nav-text">APM openOutput</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#PlaybackThread-write"><span class="nav-number">2.3.</span> <span class="nav-text">PlaybackThread write</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">zhouzuoyu</span>
+
+  
+
+  
+</div>
+
+
+
+
+
+
+
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.0.2"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.0.2"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.0.2"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.0.2"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.0.2"></script>
+
+
+
+  
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+  <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+  <script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+  
+  <script type="text/javascript">
+    var GUEST = ['nick','mail','link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(item=>{
+      return GUEST.indexOf(item)>-1;
+    });
+    new Valine({
+        el: '#comments' ,
+        verify: false,
+        notify: false,
+        appId: 's0qrr1SUElrMtB7IkHDhyquu-gzGzoHsz',
+        appKey: 'rzVUQV27Lo9pBzD6UvCMAzR6',
+        placeholder: 'Just go go',
+        avatar:'mm',
+        guest_info:guest,
+        pageSize:'10' || 10,
+    });
+  </script>
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+<script>
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

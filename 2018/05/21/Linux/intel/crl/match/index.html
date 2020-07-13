@@ -1,0 +1,890 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=6.0.2" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=6.0.2">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=6.0.2">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=6.0.2">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=6.0.2" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '6.0.2',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  
+  <meta name="keywords" content="Hexo, NexT">
+
+
+<meta name="description" content="匹配成功log $ dmesg[x.xxxxx] crlmodule 2-000E: crlmodule_populate_ds xxx selected2-000E: [adapter bus id]-[i2c addr]  代码分析 需要注册一个名字为CRLMODULE_NAME的i2c_client，将会callback crlmodule_probe 添加到supported_sensor">
+<meta property="og:type" content="article">
+<meta property="og:title" content="crl match">
+<meta property="og:url" content="http://zhouzuoyu.github.io/2018/05/21/Linux/intel/crl/match/index.html">
+<meta property="og:site_name" content="千里之行始于足下">
+<meta property="og:description" content="匹配成功log $ dmesg[x.xxxxx] crlmodule 2-000E: crlmodule_populate_ds xxx selected2-000E: [adapter bus id]-[i2c addr]  代码分析 需要注册一个名字为CRLMODULE_NAME的i2c_client，将会callback crlmodule_probe 添加到supported_sensor">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2019-12-05T06:40:38.307Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="crl match">
+<meta name="twitter:description" content="匹配成功log $ dmesg[x.xxxxx] crlmodule 2-000E: crlmodule_populate_ds xxx selected2-000E: [adapter bus id]-[i2c addr]  代码分析 需要注册一个名字为CRLMODULE_NAME的i2c_client，将会callback crlmodule_probe 添加到supported_sensor">
+
+
+
+
+
+
+  <link rel="canonical" href="http://zhouzuoyu.github.io/2018/05/21/Linux/intel/crl/match/">
+
+
+  <title>crl match | 千里之行始于足下</title>
+  
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"> <div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">千里之行始于足下</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-home"></i> <br>首页</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-th"></i> <br>分类</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>归档</a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+  
+
+
+
+ </div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://zhouzuoyu.github.io/2018/05/21/Linux/intel/crl/match/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="zhouzuoyu">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="千里之行始于足下">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">crl match</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-05-21T11:15:00+08:00">2018-05-21</time>
+            
+
+            
+            
+
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/Linux/" itemprop="url" rel="index"><span itemprop="name">Linux</span></a></span>
+
+                
+                
+                  ， 
+                
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/Linux/intel/" itemprop="url" rel="index"><span itemprop="name">intel</span></a></span>
+
+                
+                
+                  ， 
+                
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/Linux/intel/crl/" itemprop="url" rel="index"><span itemprop="name">crl</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2018/05/21/Linux/intel/crl/match/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2018/05/21/Linux/intel/crl/match/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="匹配成功log"><a href="#匹配成功log" class="headerlink" title="匹配成功log"></a>匹配成功log</h1><blockquote>
+<p>$ dmesg<br>[x.xxxxx] crlmodule 2-000E: crlmodule_populate_ds xxx selected<br>2-000E: [adapter bus id]-[i2c addr]</p>
+</blockquote>
+<h1 id="代码分析"><a href="#代码分析" class="headerlink" title="代码分析"></a>代码分析</h1><ol>
+<li>需要注册一个名字为CRLMODULE_NAME的i2c_client，将会callback crlmodule_probe</li>
+<li>添加到supported_sensors，和关键的CRL configuration file联系起来<a id="more"></a>
+<h2 id="注册device"><a href="#注册device" class="headerlink" title="注册device"></a>注册device</h2>分两步<h3 id="Adding-a-sensor-device-to-a-Linux-Device-Tree"><a href="#Adding-a-sensor-device-to-a-Linux-Device-Tree" class="headerlink" title="Adding a sensor device to a Linux Device Tree"></a>Adding a sensor device to a Linux Device Tree</h3>其实只要配置好相应的宏，例如打开CONFIG_INTEL_IPU4_DS90UB940基本就能注册上该设备。<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">static</span> <span class="class"><span class="keyword">struct</span> <span class="title">crlmodule_platform_data</span> <span class="title">ds90ub940_pdata</span> = &#123;</span></span><br><span class="line">    .xshutdown = <span class="number">1</span>,</span><br><span class="line">    .lanes = DS90UB940_LANES,</span><br><span class="line">    .ext_clk = <span class="number">24000000</span>,</span><br><span class="line">    .op_sys_clock = (<span class="keyword">uint64_t</span> [])&#123;<span class="number">600000000</span>&#125;,</span><br><span class="line">    .module_name = <span class="string">"DS90UB940"</span>,	<span class="comment">// FIXME</span></span><br><span class="line">    .id_string = <span class="string">"0x55 0x42 0x39 0x34 0x30"</span>,</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">static</span> <span class="class"><span class="keyword">struct</span> <span class="title">intel_ipu4_isys_subdev_info</span> <span class="title">ds90ub940_crl_sd</span> = &#123;</span></span><br><span class="line">    .csi2 = &amp;ds90ub940_csi2_cfg,</span><br><span class="line">    .i2c = &#123;</span><br><span class="line">        .board_info = &#123;</span><br><span class="line">            I2C_BOARD_INFO(CRLMODULE_NAME, DS90UB940_I2C_ADDRESS),	<span class="comment">// FIXME，将会调用crlmodule_probe</span></span><br><span class="line">            .platform_data = &amp;ds90ub940_pdata,</span><br><span class="line">        &#125;,</span><br><span class="line">        .i2c_adapter_id = <span class="number">9</span>,</span><br><span class="line">    &#125;,</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">static</span> <span class="class"><span class="keyword">struct</span> <span class="title">intel_ipu4_isys_subdev_pdata</span> <span class="title">pdata</span> = &#123;</span></span><br><span class="line">    .subdevs = (struct intel_ipu4_isys_subdev_info *[]) &#123;</span><br><span class="line">#ifdef CONFIG_INTEL_IPU4_DS90UB940</span><br><span class="line">        &amp;ds90ub940_crl_sd,</span><br><span class="line">#endif</span><br><span class="line">    &#125;,</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+</li>
+</ol>
+<h3 id="Adding-the-new-sensor-configuration-file-to-the-CRL-framework"><a href="#Adding-the-new-sensor-configuration-file-to-the-CRL-framework" class="headerlink" title="Adding the new sensor configuration file to the CRL framework"></a>Adding the new sensor configuration file to the CRL framework</h3><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">static</span> <span class="keyword">const</span> <span class="class"><span class="keyword">struct</span> <span class="title">crlmodule_sensors</span> <span class="title">supported_sensors</span>[] = &#123;</span></span><br><span class="line">    &#123; <span class="string">"DS90UB940"</span>, <span class="string">"ds90ub940"</span>, &amp;ds90ub940_crl_configuration &#125;,	<span class="comment">// FIXME</span></span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<h2 id="driver"><a href="#driver" class="headerlink" title="driver"></a>driver</h2><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">static</span> <span class="class"><span class="keyword">struct</span> <span class="title">i2c_driver</span> <span class="title">crlmodule_i2c_driver</span> = &#123;</span></span><br><span class="line">    .driver	= &#123;</span><br><span class="line">        .name = CRLMODULE_NAME,</span><br><span class="line">        .pm = &amp;crlmodule_pm_ops,</span><br><span class="line">    &#125;,</span><br><span class="line">    .probe	= crlmodule_probe,</span><br><span class="line">    .remove	= crlmodule_remove,</span><br><span class="line">    .id_table = crlmodule_id_table,</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">int</span> <span class="title">crlmodule_probe</span><span class="params">(struct i2c_client *client,</span></span></span><br><span class="line"><span class="function"><span class="params">			   <span class="keyword">const</span> struct i2c_device_id *devid)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    sensor-&gt;platform_data = client-&gt;dev.platform_data;</span><br><span class="line">    ret = crlmodule_populate_ds(sensor, &amp;client-&gt;dev);</span><br><span class="line">        <span class="keyword">for</span> (i = <span class="number">0</span>; i &lt; ARRAY_SIZE(supported_sensors); i++) &#123;</span><br><span class="line">            <span class="comment">/* Check the ACPI supported modules */</span></span><br><span class="line">            <span class="keyword">if</span> (!<span class="built_in">strcmp</span>(dev_name(dev), supported_sensors[i].pname)) &#123;</span><br><span class="line">                sensor-&gt;sensor_ds = supported_sensors[i].ds;</span><br><span class="line">                dev_info(dev, <span class="string">"%s %s selected\n"</span>,</span><br><span class="line">                     __func__, supported_sensors[i].name);</span><br><span class="line">                <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">            &#125;;</span><br><span class="line"></span><br><span class="line">            <span class="comment">/* Check the non ACPI modules */</span></span><br><span class="line">            <span class="keyword">if</span> (!<span class="built_in">strcmp</span>(sensor-&gt;platform_data-&gt;module_name,</span><br><span class="line">                    supported_sensors[i].pname)) &#123;</span><br><span class="line">                sensor-&gt;sensor_ds = supported_sensors[i].ds;</span><br><span class="line">                dev_info(dev, <span class="string">"%s %s selected\n"</span>,</span><br><span class="line">                     __func__, supported_sensors[i].name);</span><br><span class="line">                <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">            &#125;;</span><br><span class="line">        &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="match有两种方式"><a href="#match有两种方式" class="headerlink" title="match有两种方式"></a>match有两种方式</h2><p>There are two ways for APL Yocto Linux to add your sensor into a Linux Device Tree:<br>• Define the ACPI configuration<br>• Define the sensor in the IPU4 Platform data module.</p>
+<h1 id="ACPI-supported-modules"><a href="#ACPI-supported-modules" class="headerlink" title="ACPI supported modules"></a>ACPI supported modules</h1><blockquote>
+<p>strcmp(dev_name(dev), supported_sensors[i].pname)</p>
+</blockquote>
+<p>即client-&gt;dev和supported_sensors[i].pname的对比</p>
+<h1 id="non-ACPI-modules"><a href="#non-ACPI-modules" class="headerlink" title="non ACPI modules"></a>non ACPI modules</h1><blockquote>
+<p>strcmp(sensor-&gt;platform_data-&gt;module_name, supported_sensors[i].pname)</p>
+</blockquote>
+<p>这个case使用这种方式，<br>即client-&gt;dev.platform_data-&gt;module_name(.module_name = “DS90UB940”,)和<br>supported_sensors[i].pname({ “DS90UB940”, “ds90ub940”, &amp;ds90ub940_crl_configuration },)的对比</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/05/21/Linux/intel/crl/old_match_method/" rel="next" title="CRL老的匹配方式">
+                <i class="fa fa-chevron-left"></i> CRL老的匹配方式
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/05/24/Linux/compile/save_config/" rel="prev" title="保存.config">
+                保存.config <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+    </div>
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="/images/avatar.jpg" alt="zhouzuoyu">
+            
+              <p class="site-author-name" itemprop="name">zhouzuoyu</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">148</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">40</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+            </nav>
+          
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="mailto:hi@zhouzuoyu.com" target="_blank" title="E-Mail">
+                      
+                        <i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#匹配成功log"><span class="nav-number">1.</span> <span class="nav-text">匹配成功log</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#代码分析"><span class="nav-number">2.</span> <span class="nav-text">代码分析</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#注册device"><span class="nav-number">2.1.</span> <span class="nav-text">注册device</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Adding-a-sensor-device-to-a-Linux-Device-Tree"><span class="nav-number">2.1.1.</span> <span class="nav-text">Adding a sensor device to a Linux Device Tree</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Adding-the-new-sensor-configuration-file-to-the-CRL-framework"><span class="nav-number">2.1.2.</span> <span class="nav-text">Adding the new sensor configuration file to the CRL framework</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#driver"><span class="nav-number">2.2.</span> <span class="nav-text">driver</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#match有两种方式"><span class="nav-number">2.3.</span> <span class="nav-text">match有两种方式</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#ACPI-supported-modules"><span class="nav-number">3.</span> <span class="nav-text">ACPI supported modules</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#non-ACPI-modules"><span class="nav-number">4.</span> <span class="nav-text">non ACPI modules</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">zhouzuoyu</span>
+
+  
+
+  
+</div>
+
+
+
+
+
+
+
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.0.2"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.0.2"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.0.2"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.0.2"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.0.2"></script>
+
+
+
+  
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+  <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+  <script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+  
+  <script type="text/javascript">
+    var GUEST = ['nick','mail','link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(item=>{
+      return GUEST.indexOf(item)>-1;
+    });
+    new Valine({
+        el: '#comments' ,
+        verify: false,
+        notify: false,
+        appId: 's0qrr1SUElrMtB7IkHDhyquu-gzGzoHsz',
+        appKey: 'rzVUQV27Lo9pBzD6UvCMAzR6',
+        placeholder: 'Just go go',
+        avatar:'mm',
+        guest_info:guest,
+        pageSize:'10' || 10,
+    });
+  </script>
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+<script>
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

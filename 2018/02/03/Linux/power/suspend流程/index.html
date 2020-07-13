@@ -1,0 +1,909 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=6.0.2" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=6.0.2">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=6.0.2">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=6.0.2">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=6.0.2" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '6.0.2',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  
+  <meta name="keywords" content="Hexo, NexT">
+
+
+<meta name="description" content="源码 总框架在/sys/power/下创建各类接口  kernel\power\main.c   /sys/power/state模块代码suspend_set_ops: link平台代码  kernel\power\suspend.c">
+<meta property="og:type" content="article">
+<meta property="og:title" content="PM(3)_suspend流程">
+<meta property="og:url" content="http://zhouzuoyu.github.io/2018/02/03/Linux/power/suspend流程/index.html">
+<meta property="og:site_name" content="千里之行始于足下">
+<meta property="og:description" content="源码 总框架在/sys/power/下创建各类接口  kernel\power\main.c   /sys/power/state模块代码suspend_set_ops: link平台代码  kernel\power\suspend.c">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2019-12-05T06:40:38.307Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="PM(3)_suspend流程">
+<meta name="twitter:description" content="源码 总框架在/sys/power/下创建各类接口  kernel\power\main.c   /sys/power/state模块代码suspend_set_ops: link平台代码  kernel\power\suspend.c">
+
+
+
+
+
+
+  <link rel="canonical" href="http://zhouzuoyu.github.io/2018/02/03/Linux/power/suspend流程/">
+
+
+  <title>PM(3)_suspend流程 | 千里之行始于足下</title>
+  
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"> <div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">千里之行始于足下</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-home"></i> <br>首页</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-th"></i> <br>分类</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>归档</a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+  
+
+
+
+ </div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://zhouzuoyu.github.io/2018/02/03/Linux/power/suspend流程/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="zhouzuoyu">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="千里之行始于足下">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">PM(3)_suspend流程</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-02-03T12:00:00+08:00">2018-02-03</time>
+            
+
+            
+            
+
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/Linux/" itemprop="url" rel="index"><span itemprop="name">Linux</span></a></span>
+
+                
+                
+                  ， 
+                
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/Linux/power/" itemprop="url" rel="index"><span itemprop="name">power</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2018/02/03/Linux/power/suspend流程/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2018/02/03/Linux/power/suspend流程/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="源码"><a href="#源码" class="headerlink" title="源码"></a>源码</h1><ol>
+<li><p>总框架<br>在/sys/power/下创建各类接口</p>
+<blockquote>
+<p>kernel\power\main.c</p>
+</blockquote>
+</li>
+<li><p>/sys/power/state模块代码<br>suspend_set_ops: link平台代码</p>
+<blockquote>
+<p>kernel\power\suspend.c</p>
+</blockquote>
+</li>
+</ol>
+<a id="more"></a>
+<ol start="3">
+<li><p>平台相关的suspend &amp; resume函数</p>
+<blockquote>
+<p>arch\arm\plat-samsung\pm.c<br>arch\arm\mach-s3c24xx\pm.c</p>
+</blockquote>
+</li>
+<li><p>Device suspend &amp; resume的驱动框架和API</p>
+<blockquote>
+<p>drivers\base\power\main.c</p>
+</blockquote>
+</li>
+</ol>
+<h1 id="功能"><a href="#功能" class="headerlink" title="功能"></a>功能</h1><p><strong>echo mem &gt; /sys/power/state</strong>将会导致系统进入suspend流程<br>1：各个devices的suspend函数被调用<br>2：平台端suspend被调用</p>
+<h1 id="源码分析"><a href="#源码分析" class="headerlink" title="源码分析"></a>源码分析</h1><h2 id="sys-power-state"><a href="#sys-power-state" class="headerlink" title="/sys/power/state"></a>/sys/power/state</h2><ol>
+<li><p>注册/sys/power/state</p>
+ <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">power_attr(state);</span><br><span class="line"><span class="keyword">static</span> <span class="class"><span class="keyword">struct</span> <span class="title">attribute</span> * <span class="title">g</span>[] = &#123;</span></span><br><span class="line">    &amp;state_attr.attr</span><br><span class="line">&#125;;</span><br><span class="line">pm_init</span><br><span class="line">    <span class="comment">// 创建/sys/power/xxx属性节点</span></span><br><span class="line">    power_kobj = kobject_create_and_add(<span class="string">"power"</span>, <span class="literal">NULL</span>);</span><br><span class="line">    error = sysfs_create_group(power_kobj, &amp;attr_group);</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>suspend流程<br> 写/sys/power/state将会调用该函数</p>
+ <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line">state_store(struct kobject *kobj, struct kobj_attribute *attr, <span class="keyword">const</span> <span class="keyword">char</span> *buf, <span class="keyword">size_t</span> n)</span><br><span class="line">    error = pm_suspend(state);</span><br><span class="line">        error = enter_state(state);</span><br><span class="line">            <span class="comment">// 判断valid</span></span><br><span class="line">            valid_state(state)</span><br><span class="line">                suspend_ops-&gt;valid(state);	<span class="comment">// suspend_valid_only_mem: 只支持STR模式</span></span><br><span class="line">            <span class="comment">// prepare &lt;--&gt; finish</span></span><br><span class="line">            suspend_prepare(state);</span><br><span class="line">                pm_prepare_console();</span><br><span class="line">                suspend_freeze_processes();</span><br><span class="line">        </span><br><span class="line">            <span class="comment">// suspend &amp; resume</span></span><br><span class="line">            suspend_devices_and_enter(state);</span><br><span class="line">                <span class="comment">// Device端的suspend</span></span><br><span class="line">                dpm_suspend_start(PMSG_SUSPEND);</span><br><span class="line">                <span class="comment">// 平台端的suspend和resume</span></span><br><span class="line">                <span class="keyword">do</span> &#123;</span><br><span class="line">                    error = suspend_enter(state, &amp;wakeup);</span><br><span class="line">                        <span class="comment">// suspend</span></span><br><span class="line">                        platform_suspend_prepare(state);<span class="comment">// suspend_ops-&gt;prepare(): s3c_pm_prepare</span></span><br><span class="line">                        disable_nonboot_cpus();</span><br><span class="line">                        arch_suspend_disable_irqs();</span><br><span class="line">                        syscore_suspend();</span><br><span class="line">                        suspend_ops-&gt;enter(state);		<span class="comment">// <span class="doctag">FIXME:</span> s3c_pm_enter</span></span><br><span class="line">                        <span class="comment">// resume</span></span><br><span class="line">                        syscore_resume();</span><br><span class="line">                        arch_suspend_enable_irqs();</span><br><span class="line">                        enable_nonboot_cpus();</span><br><span class="line">                        platform_resume_finish(state);	<span class="comment">// suspend_ops-&gt;finish(): s3c_pm_finish</span></span><br><span class="line">                &#125; <span class="keyword">while</span> (!error &amp;&amp; !wakeup &amp;&amp; platform_suspend_again(state));</span><br><span class="line">                <span class="comment">// Device端的resume</span></span><br><span class="line">                dpm_resume_end(PMSG_RESUME);</span><br><span class="line">            <span class="comment">// finish &lt;--&gt; prepare</span></span><br><span class="line">            suspend_finish();</span><br><span class="line">                suspend_thaw_processes();</span><br><span class="line">                pm_restore_console();</span><br></pre></td></tr></table></figure>
+</li>
+</ol>
+<h2 id="平台suspend-ops"><a href="#平台suspend-ops" class="headerlink" title="平台suspend_ops"></a>平台suspend_ops</h2><p>填充platform_suspend_ops<br><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/* register platform pm ops */</span></span><br><span class="line"><span class="keyword">static</span> <span class="keyword">const</span> <span class="class"><span class="keyword">struct</span> <span class="title">platform_suspend_ops</span> <span class="title">s3c_pm_ops</span> = &#123;</span></span><br><span class="line">    .enter		= s3c_pm_enter,	<span class="comment">// 平台端的suspend函数</span></span><br><span class="line">    .prepare	= s3c_pm_prepare,</span><br><span class="line">    .finish		= s3c_pm_finish,</span><br><span class="line">    .valid		= suspend_valid_only_mem,</span><br><span class="line">&#125;;</span><br><span class="line">s3c_pm_enter</span><br><span class="line">    <span class="comment">// check extint resource</span></span><br><span class="line">    s3c_pm_configure_extint();</span><br><span class="line">    <span class="comment">// exec platform suspend func: assemble code</span></span><br><span class="line">    ret = cpu_suspend(<span class="number">0</span>, pm_cpu_sleep);</span><br><span class="line">        pm_cpu_sleep = s3c2410_cpu_suspend;	<span class="comment">// pm_cpu_sleep form</span></span><br><span class="line">        ENTRY(s3c2410_cpu_suspend)	<span class="comment">// linux-4.13.1\arch\arm\mach-s3c24xx\sleep-s3c2410.S</span></span><br><span class="line"></span><br><span class="line">s3c_pm_init</span><br><span class="line">    suspend_set_ops(&amp;s3c_pm_ops);</span><br><span class="line">        suspend_ops = ops;	<span class="comment">// <span class="doctag">FIXME:</span> suspend.c</span></span><br></pre></td></tr></table></figure></p>
+<h2 id="Device-suspend-resume"><a href="#Device-suspend-resume" class="headerlink" title="Device suspend/resume"></a>Device suspend/resume</h2><ol>
+<li><p>register</p>
+ <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">int device_add(struct device *dev)</span><br><span class="line">    device_pm_add(dev);</span><br><span class="line">        list_add_tail(&amp;dev-&gt;power.entry, &amp;dpm_list);	// dpm_list</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>device suspend<br> callback func:<br> 　　dev-&gt;pm_domain-&gt;ops<br> 　　dev-&gt;type-&gt;pm<br> 　　dev-&gt;class-&gt;pm<br> 　　dev-&gt;bus-&gt;pm<br> 　　dev-&gt;driver-&gt;pm<br> 涉及dpm_list/dpm_prepared_list/dpm_suspended_list等链表</p>
+ <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">dpm_suspend_start(PMSG_SUSPEND);</span><br><span class="line">    dpm_prepare(state);</span><br><span class="line">        <span class="keyword">while</span> (!list_empty(&amp;dpm_list)) &#123;</span><br><span class="line">            device_prepare(dev, state);	<span class="comment">// callback prepare func.</span></span><br><span class="line">                callback = dev-&gt;pm_domain-&gt;ops.prepare; || dev-&gt;type-&gt;pm-&gt;prepare; || callback = dev-&gt;class-&gt;pm-&gt;prepare; || callback = dev-&gt;bus-&gt;pm-&gt;prepare; || callback = dev-&gt;driver-&gt;pm-&gt;prepare;</span><br><span class="line">                callback(dev);</span><br><span class="line">            list_move_tail(&amp;dev-&gt;power.entry, &amp;dpm_prepared_list);	<span class="comment">// dpm_list -&gt; dpm_prepared_list</span></span><br><span class="line">        &#125;</span><br><span class="line">    dpm_suspend(state);</span><br><span class="line">        <span class="keyword">while</span> (!list_empty(&amp;dpm_prepared_list)) &#123;</span><br><span class="line">            device_suspend(dev);</span><br><span class="line">                __device_suspend(dev, pm_transition, <span class="literal">false</span>);</span><br><span class="line">                    callback = pm_op(&amp;dev-&gt;pm_domain-&gt;ops, state); || pm_op(dev-&gt;type-&gt;pm, state); || pm_op(dev-&gt;class-&gt;pm, state); || pm_op(dev-&gt;bus-&gt;pm, state); || pm_op(dev-&gt;driver-&gt;pm, state);</span><br><span class="line">                    dpm_run_callback(callback, dev, state, info);</span><br><span class="line">            list_move(&amp;dev-&gt;power.entry, &amp;dpm_suspended_list);		<span class="comment">// dpm_prepared_list -&gt; dpm_suspended_list</span></span><br><span class="line">        &#125;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>device resume</p>
+ <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">dpm_resume_end(PMSG_RESUME);</span><br><span class="line">    dpm_resume(state);</span><br><span class="line">        <span class="keyword">while</span> (!list_empty(&amp;dpm_suspended_list)) &#123;</span><br><span class="line">            device_resume(dev, state, <span class="literal">false</span>);</span><br><span class="line">                callback = pm_op(&amp;dev-&gt;pm_domain-&gt;ops, state); || pm_op(dev-&gt;type-&gt;pm, state); || pm_op(dev-&gt;class-&gt;pm, state); || pm_op(dev-&gt;bus-&gt;pm, state); || pm_op(dev-&gt;driver-&gt;pm, state);</span><br><span class="line">                dpm_run_callback(callback, dev, state, info);</span><br><span class="line">            list_move_tail(&amp;dev-&gt;power.entry, &amp;dpm_prepared_list);	<span class="comment">// dpm_suspended_list -&gt; dpm_prepared_list</span></span><br><span class="line">        &#125;</span><br><span class="line">    dpm_complete(state);</span><br><span class="line">        <span class="keyword">while</span> (!list_empty(&amp;dpm_prepared_list)) &#123;</span><br><span class="line">            list_move(&amp;dev-&gt;power.entry, &amp;<span class="built_in">list</span>);</span><br><span class="line">            device_complete(dev, state);</span><br><span class="line">                callback = dev-&gt;pm_domain-&gt;ops.complete; || dev-&gt;type-&gt;pm-&gt;complete; || dev-&gt;<span class="class"><span class="keyword">class</span>-&gt;<span class="title">pm</span>-&gt;<span class="title">complete</span>;</span> || dev-&gt;bus-&gt;pm-&gt;complete; || dev-&gt;driver-&gt;pm-&gt;complete;</span><br><span class="line">                callback(dev);</span><br><span class="line">        &#125;</span><br><span class="line">        list_splice(&amp;<span class="built_in">list</span>, &amp;dpm_list);								<span class="comment">// dpm_prepared_list -&gt; dpm_list</span></span><br></pre></td></tr></table></figure>
+</li>
+</ol>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/02/03/Linux/power/wakeup_count/" rel="next" title="PM(5)_wakeup_count">
+                <i class="fa fa-chevron-left"></i> PM(5)_wakeup_count
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/02/03/Linux/power/runtime/" rel="prev" title="PM(6)_runtime">
+                PM(6)_runtime <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+    </div>
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="/images/avatar.jpg" alt="zhouzuoyu">
+            
+              <p class="site-author-name" itemprop="name">zhouzuoyu</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">148</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">40</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+            </nav>
+          
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="mailto:hi@zhouzuoyu.com" target="_blank" title="E-Mail">
+                      
+                        <i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#源码"><span class="nav-number">1.</span> <span class="nav-text">源码</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#功能"><span class="nav-number">2.</span> <span class="nav-text">功能</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#源码分析"><span class="nav-number">3.</span> <span class="nav-text">源码分析</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#sys-power-state"><span class="nav-number">3.1.</span> <span class="nav-text">/sys/power/state</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#平台suspend-ops"><span class="nav-number">3.2.</span> <span class="nav-text">平台suspend_ops</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Device-suspend-resume"><span class="nav-number">3.3.</span> <span class="nav-text">Device suspend/resume</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">zhouzuoyu</span>
+
+  
+
+  
+</div>
+
+
+
+
+
+
+
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.0.2"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.0.2"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.0.2"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.0.2"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.0.2"></script>
+
+
+
+  
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+  <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+  <script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+  
+  <script type="text/javascript">
+    var GUEST = ['nick','mail','link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(item=>{
+      return GUEST.indexOf(item)>-1;
+    });
+    new Valine({
+        el: '#comments' ,
+        verify: false,
+        notify: false,
+        appId: 's0qrr1SUElrMtB7IkHDhyquu-gzGzoHsz',
+        appKey: 'rzVUQV27Lo9pBzD6UvCMAzR6',
+        placeholder: 'Just go go',
+        avatar:'mm',
+        guest_info:guest,
+        pageSize:'10' || 10,
+    });
+  </script>
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+<script>
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

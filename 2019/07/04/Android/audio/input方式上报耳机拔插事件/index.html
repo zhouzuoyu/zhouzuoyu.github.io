@@ -1,0 +1,888 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=6.0.2" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=6.0.2">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=6.0.2">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=6.0.2">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=6.0.2" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '6.0.2',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  
+  <meta name="keywords" content="Hexo, NexT">
+
+
+<meta name="description" content="InputReader.cpp-&amp;gt;InputDispatcher.cpp-&amp;gt;com_android_server_input_InputManagerService.cpp-&amp;gt;InputManagerService.java-&amp;gt;WiredAccessoryManager.java 配置文件 frameworks\base\core\res\res\values\config">
+<meta property="og:type" content="article">
+<meta property="og:title" content="input方式上报耳机拔插事件">
+<meta property="og:url" content="http://zhouzuoyu.github.io/2019/07/04/Android/audio/input方式上报耳机拔插事件/index.html">
+<meta property="og:site_name" content="千里之行始于足下">
+<meta property="og:description" content="InputReader.cpp-&amp;gt;InputDispatcher.cpp-&amp;gt;com_android_server_input_InputManagerService.cpp-&amp;gt;InputManagerService.java-&amp;gt;WiredAccessoryManager.java 配置文件 frameworks\base\core\res\res\values\config">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2019-12-05T06:40:38.307Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="input方式上报耳机拔插事件">
+<meta name="twitter:description" content="InputReader.cpp-&amp;gt;InputDispatcher.cpp-&amp;gt;com_android_server_input_InputManagerService.cpp-&amp;gt;InputManagerService.java-&amp;gt;WiredAccessoryManager.java 配置文件 frameworks\base\core\res\res\values\config">
+
+
+
+
+
+
+  <link rel="canonical" href="http://zhouzuoyu.github.io/2019/07/04/Android/audio/input方式上报耳机拔插事件/">
+
+
+  <title>input方式上报耳机拔插事件 | 千里之行始于足下</title>
+  
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"> <div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">千里之行始于足下</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-home"></i> <br>首页</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-th"></i> <br>分类</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>归档</a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+  
+
+
+
+ </div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://zhouzuoyu.github.io/2019/07/04/Android/audio/input方式上报耳机拔插事件/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="zhouzuoyu">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="千里之行始于足下">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">input方式上报耳机拔插事件</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-07-04T10:12:00+08:00">2019-07-04</time>
+            
+
+            
+            
+
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/Android/" itemprop="url" rel="index"><span itemprop="name">Android</span></a></span>
+
+                
+                
+                  ， 
+                
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/Android/audio/" itemprop="url" rel="index"><span itemprop="name">audio</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2019/07/04/Android/audio/input方式上报耳机拔插事件/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2019/07/04/Android/audio/input方式上报耳机拔插事件/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p><strong>InputReader.cpp-&gt;InputDispatcher.cpp-&gt;com_android_server_input_InputManagerService.cpp-&gt;InputManagerService.java-&gt;WiredAccessoryManager.java</strong></p>
+<h1 id="配置文件"><a href="#配置文件" class="headerlink" title="配置文件"></a>配置文件</h1><blockquote>
+<p>frameworks\base\core\res\res\values\config.xml</p>
+</blockquote>
+<p>选择使用uevent还是input方式<br><figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">&lt;!-- When true use the linux /dev/input/event subsystem to detect the switch changes</span></span><br><span class="line"><span class="comment">	 on the headphone/microphone jack. When false use the older uevent framework. --&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">bool</span> <span class="attr">name</span>=<span class="string">"config_useDevInputEventForAudioJack"</span>&gt;</span>true<span class="tag">&lt;/<span class="name">bool</span>&gt;</span></span><br></pre></td></tr></table></figure></p>
+<a id="more"></a>
+<h1 id="InputReader-cpp"><a href="#InputReader-cpp" class="headerlink" title="InputReader.cpp"></a>InputReader.cpp</h1><blockquote>
+<p>frameworks\native\services\inputflinger\InputReader.cpp</p>
+</blockquote>
+<p>对switch事件做简单的处理，然后给InputDispatcher<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">void</span> SwitchInputMapper::process(<span class="keyword">const</span> RawEvent* rawEvent) &#123;</span><br><span class="line">    <span class="keyword">switch</span> (rawEvent-&gt;type) &#123;</span><br><span class="line">    <span class="keyword">case</span> EV_SW:</span><br><span class="line">        processSwitch(rawEvent-&gt;code, rawEvent-&gt;value);</span><br><span class="line">            <span class="comment">// 解析code和value</span></span><br><span class="line">            <span class="keyword">if</span> (switchCode &gt;= <span class="number">0</span> &amp;&amp; switchCode &lt; <span class="number">32</span>) &#123;</span><br><span class="line">                <span class="keyword">if</span> (switchValue) &#123;</span><br><span class="line">                    mSwitchValues |= <span class="number">1</span> &lt;&lt; switchCode;</span><br><span class="line">                &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                    mSwitchValues &amp;= ~(<span class="number">1</span> &lt;&lt; switchCode);</span><br><span class="line">                &#125;</span><br><span class="line">                mUpdatedSwitchMask |= <span class="number">1</span> &lt;&lt; switchCode;</span><br><span class="line">            &#125;</span><br><span class="line">        <span class="keyword">break</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">case</span> EV_SYN:</span><br><span class="line">        <span class="keyword">if</span> (rawEvent-&gt;code == SYN_REPORT) &#123;</span><br><span class="line">            sync(rawEvent-&gt;when);</span><br><span class="line">                <span class="comment">// 根据code/value构建args，然后给InputDispatcher</span></span><br><span class="line">                <span class="keyword">uint32_t</span> updatedSwitchValues = mSwitchValues &amp; mUpdatedSwitchMask;</span><br><span class="line">                <span class="function">NotifySwitchArgs <span class="title">args</span><span class="params">(when, <span class="number">0</span>, updatedSwitchValues, mUpdatedSwitchMask)</span></span>;</span><br><span class="line">                getListener()-&gt;notifySwitch(&amp;args);	<span class="comment">// getListener为InputDispatcher，即调用InputDispatcher::notifySwitch</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h1 id="InputDispatcher-cpp"><a href="#InputDispatcher-cpp" class="headerlink" title="InputDispatcher.cpp"></a>InputDispatcher.cpp</h1><blockquote>
+<p>frameworks\native\services\inputflinger\InputDispatcher.cpp</p>
+</blockquote>
+<p>将调用NativeInputManager::notifySwitch<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// mPolicy就是NativeInputManager</span></span><br><span class="line">NativeInputManager::NativeInputManager(jobject contextObj,</span><br><span class="line">        jobject serviceObj, <span class="keyword">const</span> sp&lt;Looper&gt;&amp; looper) :</span><br><span class="line">        mLooper(looper), mInteractive(<span class="literal">true</span>) &#123;</span><br><span class="line">    mInputManager = <span class="keyword">new</span> InputManager(eventHub, <span class="keyword">this</span>, <span class="keyword">this</span>);</span><br><span class="line">        mDispatcher = <span class="keyword">new</span> InputDispatcher(dispatcherPolicy);	<span class="comment">// dispatcherPolicy==this，即dispatcherPolicy就是NativeInputManager</span></span><br><span class="line">            InputDispatcher::InputDispatcher(<span class="keyword">const</span> sp&lt;InputDispatcherPolicyInterface&gt;&amp; policy) :</span><br><span class="line">                mPolicy(policy),	<span class="comment">// mPolicy就是NativeInputManager</span></span><br><span class="line">        mReader = <span class="keyword">new</span> InputReader(eventHub, readerPolicy, mDispatcher);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">void</span> InputDispatcher::notifySwitch(<span class="keyword">const</span> NotifySwitchArgs* args) &#123;</span><br><span class="line">    mPolicy-&gt;notifySwitch(args-&gt;eventTime,</span><br><span class="line">            args-&gt;switchValues, args-&gt;switchMask, policyFlags);	<span class="comment">// mPolicy==NativeInputManager，所以就是调用NativeInputManager::notifySwitch</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h1 id="com-android-server-input-InputManagerService-cpp"><a href="#com-android-server-input-InputManagerService-cpp" class="headerlink" title="com_android_server_input_InputManagerService.cpp"></a>com_android_server_input_InputManagerService.cpp</h1><blockquote>
+<p>frameworks\base\services\core\jni\com_android_server_input_InputManagerService.cpp</p>
+</blockquote>
+<p>JNI，调用InputManagerService.notifySwitch<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">void</span> NativeInputManager::notifySwitch(<span class="keyword">nsecs_t</span> when,</span><br><span class="line">        <span class="keyword">uint32_t</span> switchValues, <span class="keyword">uint32_t</span> switchMask, <span class="keyword">uint32_t</span> policyFlags) &#123;</span><br><span class="line">    JNIEnv* env = jniEnv();</span><br><span class="line"></span><br><span class="line">    env-&gt;CallVoidMethod(mServiceObj, gServiceClassInfo.notifySwitch,</span><br><span class="line">            when, switchValues, switchMask);	<span class="comment">// 调用InputManagerService.notifySwitch</span></span><br><span class="line">    checkAndClearExceptionFromCallback(env, <span class="string">"notifySwitch"</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h1 id="InputManagerService-java"><a href="#InputManagerService-java" class="headerlink" title="InputManagerService.java"></a>InputManagerService.java</h1><p>将调用WiredAccessoryManager.notifyWiredAccessoryChanged，最终调用updateLocked</p>
+<blockquote>
+<p>frameworks\base\services\core\java\com\android\server\input\InputManagerService.java</p>
+</blockquote>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">startOtherServices</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    inputManager = <span class="keyword">new</span> InputManagerService(context);</span><br><span class="line">        mUseDevInputEventForAudioJack =</span><br><span class="line">                context.getResources().getBoolean(R.bool.config_useDevInputEventForAudioJack);	<span class="comment">// frameworks\base\core\res\res\values\config.xml</span></span><br><span class="line">        mPtr = nativeInit(<span class="keyword">this</span>, mContext, mHandler.getLooper().getQueue());	<span class="comment">// 调用com_android_server_input_InputManagerService.cpp中的native函数</span></span><br><span class="line"></span><br><span class="line">    inputManager.setWiredAccessoryCallbacks(</span><br><span class="line">            <span class="keyword">new</span> WiredAccessoryManager(context, inputManager));	<span class="comment">// 建立WiredAccessoryManager和InputManagerService的联系，这样InputManagerService就能对应到WiredAccessoryManager</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">InputManagerService</span> <span class="keyword">extends</span> <span class="title">IInputManager</span>.<span class="title">Stub</span></span></span><br><span class="line"><span class="class">		<span class="keyword">implements</span> <span class="title">Watchdog</span>.<span class="title">Monitor</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 将调用WiredAccessoryManager.notifyWiredAccessoryChanged</span></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">notifySwitch</span><span class="params">(<span class="keyword">long</span> whenNanos, <span class="keyword">int</span> switchValues, <span class="keyword">int</span> switchMask)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (mUseDevInputEventForAudioJack &amp;&amp; (switchMask &amp; SW_JACK_BITS) != <span class="number">0</span>) &#123;</span><br><span class="line">            mWiredAccessoryCallbacks.notifyWiredAccessoryChanged(whenNanos, switchValues,</span><br><span class="line">                    switchMask);	<span class="comment">// WiredAccessoryManager.notifyWiredAccessoryChanged</span></span><br><span class="line">                mSwitchValues = (mSwitchValues &amp; ~switchMask) | switchValues;</span><br><span class="line">                <span class="comment">// 有SW_MICROPHONE_INSERT_BIT就是headset</span></span><br><span class="line">                <span class="keyword">switch</span> (mSwitchValues &amp;</span><br><span class="line">                    (SW_HEADPHONE_INSERT_BIT | SW_MICROPHONE_INSERT_BIT | SW_LINEOUT_INSERT_BIT)) &#123;</span><br><span class="line">                    <span class="keyword">case</span> <span class="number">0</span>:</span><br><span class="line">                        headset = <span class="number">0</span>;</span><br><span class="line">                        <span class="keyword">break</span>;</span><br><span class="line"></span><br><span class="line">                    <span class="keyword">case</span> SW_HEADPHONE_INSERT_BIT:</span><br><span class="line">                        headset = BIT_HEADSET_NO_MIC;</span><br><span class="line">                        <span class="keyword">break</span>;</span><br><span class="line"></span><br><span class="line">                    <span class="keyword">case</span> SW_LINEOUT_INSERT_BIT:</span><br><span class="line">                        headset = BIT_LINEOUT;</span><br><span class="line">                        <span class="keyword">break</span>;</span><br><span class="line"></span><br><span class="line">                    <span class="keyword">case</span> SW_HEADPHONE_INSERT_BIT | SW_MICROPHONE_INSERT_BIT:</span><br><span class="line">                        headset = BIT_HEADSET;</span><br><span class="line">                        <span class="keyword">break</span>;</span><br><span class="line"></span><br><span class="line">                    <span class="keyword">case</span> SW_MICROPHONE_INSERT_BIT:</span><br><span class="line">                        headset = BIT_HEADSET;</span><br><span class="line">                        <span class="keyword">break</span>;</span><br><span class="line"></span><br><span class="line">                    <span class="keyword">default</span>:</span><br><span class="line">                        headset = <span class="number">0</span>;</span><br><span class="line">                        <span class="keyword">break</span>;</span><br><span class="line">                &#125;</span><br><span class="line">                updateLocked(NAME_H2W,</span><br><span class="line">                    (mHeadsetState &amp; ~(BIT_HEADSET | BIT_HEADSET_NO_MIC | BIT_LINEOUT)) | headset);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2019/07/04/Android/audio/uevent方式上报耳机拔插事件/" rel="next" title="uevent方式上报耳机拔插事件">
+                <i class="fa fa-chevron-left"></i> uevent方式上报耳机拔插事件
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2019/07/16/Linux/audio/asoc/imx-pcm-fiq/" rel="prev" title="DMA使用定时器告知传输完period size">
+                DMA使用定时器告知传输完period size <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+    </div>
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="/images/avatar.jpg" alt="zhouzuoyu">
+            
+              <p class="site-author-name" itemprop="name">zhouzuoyu</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">148</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">40</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+            </nav>
+          
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="mailto:hi@zhouzuoyu.com" target="_blank" title="E-Mail">
+                      
+                        <i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#配置文件"><span class="nav-number">1.</span> <span class="nav-text">配置文件</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#InputReader-cpp"><span class="nav-number">2.</span> <span class="nav-text">InputReader.cpp</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#InputDispatcher-cpp"><span class="nav-number">3.</span> <span class="nav-text">InputDispatcher.cpp</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#com-android-server-input-InputManagerService-cpp"><span class="nav-number">4.</span> <span class="nav-text">com_android_server_input_InputManagerService.cpp</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#InputManagerService-java"><span class="nav-number">5.</span> <span class="nav-text">InputManagerService.java</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">zhouzuoyu</span>
+
+  
+
+  
+</div>
+
+
+
+
+
+
+
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.0.2"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.0.2"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.0.2"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.0.2"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.0.2"></script>
+
+
+
+  
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+  <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+  <script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+  
+  <script type="text/javascript">
+    var GUEST = ['nick','mail','link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(item=>{
+      return GUEST.indexOf(item)>-1;
+    });
+    new Valine({
+        el: '#comments' ,
+        verify: false,
+        notify: false,
+        appId: 's0qrr1SUElrMtB7IkHDhyquu-gzGzoHsz',
+        appKey: 'rzVUQV27Lo9pBzD6UvCMAzR6',
+        placeholder: 'Just go go',
+        avatar:'mm',
+        guest_info:guest,
+        pageSize:'10' || 10,
+    });
+  </script>
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+<script>
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

@@ -1,0 +1,895 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=6.0.2" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=6.0.2">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=6.0.2">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=6.0.2">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=6.0.2" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '6.0.2',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  
+  <meta name="keywords" content="Hexo, NexT">
+
+
+<meta name="description" content="源码 wm8960.c (linux-3.0.86\sound\soc\codecs)soc-dapm.c (linux-3.0.86\sound\soc\codecs)  注册widget和path先注册widget再添加route因为创建path需要widget的支撑1234static int wm8960_add_widgets(struct snd_soc_codec *codec)	s">
+<meta property="og:type" content="article">
+<meta property="og:title" content="widget和route">
+<meta property="og:url" content="http://zhouzuoyu.github.io/2018/03/20/Linux/audio/asoc/dapm/widget_route/index.html">
+<meta property="og:site_name" content="千里之行始于足下">
+<meta property="og:description" content="源码 wm8960.c (linux-3.0.86\sound\soc\codecs)soc-dapm.c (linux-3.0.86\sound\soc\codecs)  注册widget和path先注册widget再添加route因为创建path需要widget的支撑1234static int wm8960_add_widgets(struct snd_soc_codec *codec)	s">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="http://zhouzuoyu.github.io/2018/03/20/Linux/audio/asoc/dapm/widget_route/add_widget.png">
+<meta property="og:image" content="http://zhouzuoyu.github.io/2018/03/20/Linux/audio/asoc/dapm/widget_route/add_path.png">
+<meta property="og:updated_time" content="2020-07-13T08:11:41.435Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="widget和route">
+<meta name="twitter:description" content="源码 wm8960.c (linux-3.0.86\sound\soc\codecs)soc-dapm.c (linux-3.0.86\sound\soc\codecs)  注册widget和path先注册widget再添加route因为创建path需要widget的支撑1234static int wm8960_add_widgets(struct snd_soc_codec *codec)	s">
+<meta name="twitter:image" content="http://zhouzuoyu.github.io/2018/03/20/Linux/audio/asoc/dapm/widget_route/add_widget.png">
+
+
+
+
+
+
+  <link rel="canonical" href="http://zhouzuoyu.github.io/2018/03/20/Linux/audio/asoc/dapm/widget_route/">
+
+
+  <title>widget和route | 千里之行始于足下</title>
+  
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"> <div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">千里之行始于足下</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-home"></i> <br>首页</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-th"></i> <br>分类</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>归档</a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+  
+
+
+
+ </div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://zhouzuoyu.github.io/2018/03/20/Linux/audio/asoc/dapm/widget_route/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="zhouzuoyu">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="千里之行始于足下">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">widget和route</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-03-20T17:06:47+08:00">2018-03-20</time>
+            
+
+            
+            
+
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/Linux/" itemprop="url" rel="index"><span itemprop="name">Linux</span></a></span>
+
+                
+                
+                  ， 
+                
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/Linux/asoc/" itemprop="url" rel="index"><span itemprop="name">asoc</span></a></span>
+
+                
+                
+                  ， 
+                
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/Linux/asoc/dapm/" itemprop="url" rel="index"><span itemprop="name">dapm</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2018/03/20/Linux/audio/asoc/dapm/widget_route/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2018/03/20/Linux/audio/asoc/dapm/widget_route/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="源码"><a href="#源码" class="headerlink" title="源码"></a>源码</h1><blockquote>
+<p>wm8960.c (linux-3.0.86\sound\soc\codecs)<br>soc-dapm.c (linux-3.0.86\sound\soc\codecs)</p>
+</blockquote>
+<h1 id="注册widget和path"><a href="#注册widget和path" class="headerlink" title="注册widget和path"></a>注册widget和path</h1><p>先注册widget再添加route<br>因为创建path需要widget的支撑<br><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">int</span> <span class="title">wm8960_add_widgets</span><span class="params">(struct snd_soc_codec *codec)</span></span></span><br><span class="line"><span class="function">	<span class="title">snd_soc_dapm_new_controls</span><span class="params">(dapm, wm8960_dapm_widgets,</span></span></span><br><span class="line"><span class="function"><span class="params">				  ARRAY_SIZE(wm8960_dapm_widgets))</span></span>;</span><br><span class="line">    snd_soc_dapm_add_routes(dapm, audio_paths, ARRAY_SIZE(audio_paths));</span><br></pre></td></tr></table></figure></p>
+<a id="more"></a>
+<h1 id="widget"><a href="#widget" class="headerlink" title="widget"></a>widget</h1><h2 id="定义"><a href="#定义" class="headerlink" title="定义"></a>定义</h2><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">static</span> <span class="keyword">const</span> <span class="class"><span class="keyword">struct</span> <span class="title">snd_soc_dapm_widget</span> <span class="title">wm8960_dapm_widgets</span>[] = &#123;</span></span><br><span class="line">    SND_SOC_DAPM_INPUT(<span class="string">"LINPUT1"</span>),</span><br><span class="line">    ...</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p>mixer类型的widget必然有switch<br><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">static</span> <span class="keyword">const</span> <span class="class"><span class="keyword">struct</span> <span class="title">snd_kcontrol_new</span> <span class="title">wm8960_lin_boost</span>[] = &#123;</span></span><br><span class="line">    SOC_DAPM_SINGLE(<span class="string">"LINPUT2 Switch"</span>, WM8960_LINPATH, <span class="number">6</span>, <span class="number">1</span>, <span class="number">0</span>),</span><br><span class="line">    SOC_DAPM_SINGLE(<span class="string">"LINPUT3 Switch"</span>, WM8960_LINPATH, <span class="number">7</span>, <span class="number">1</span>, <span class="number">0</span>),</span><br><span class="line">    SOC_DAPM_SINGLE(<span class="string">"LINPUT1 Switch"</span>, WM8960_LINPATH, <span class="number">8</span>, <span class="number">1</span>, <span class="number">0</span>),	<span class="comment">// WM8960_LINPATH reg的第8位决定开关的状态</span></span><br><span class="line">&#125;;</span><br><span class="line">SND_SOC_DAPM_MIXER(<span class="string">"Left Boost Mixer"</span>, WM8960_POWER1, <span class="number">5</span>, <span class="number">0</span>,</span><br><span class="line">           wm8960_lin_boost, ARRAY_SIZE(wm8960_lin_boost)),</span><br></pre></td></tr></table></figure></p>
+<h2 id="注册"><a href="#注册" class="headerlink" title="注册"></a>注册</h2><p>只是添加到dapm-&gt;card-&gt;widgets中，创建声卡的时候会遍历它进行相应的处理<br><img src="/2018/03/20/Linux/audio/asoc/dapm/widget_route/add_widget.png" alt="widget_route"><br><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">snd_soc_dapm_new_controls(dapm, wm8960_dapm_widgets, ARRAY_SIZE(wm8960_dapm_widgets));</span><br><span class="line">    <span class="keyword">for</span> (i = <span class="number">0</span>; i &lt; num; i++) &#123;</span><br><span class="line">        ret = snd_soc_dapm_new_control(dapm, widget);</span><br><span class="line">            w = dapm_cnew_widget(widget);</span><br><span class="line">            list_add(&amp;w-&gt;<span class="built_in">list</span>, &amp;dapm-&gt;card-&gt;widgets);	<span class="comment">// 添加到链表中</span></span><br><span class="line">            w-&gt;connected = <span class="number">1</span>;</span><br><span class="line">        widget++;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure></p>
+<h2 id="process"><a href="#process" class="headerlink" title="process"></a>process</h2><p>主要是创建里面的kcontrol<br><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><span class="line">snd_soc_dapm_new_widgets</span><br><span class="line">    list_for_each_entry(w, &amp;card-&gt;widgets, <span class="built_in">list</span>)</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="keyword">if</span> (w-&gt;num_kcontrols) &#123;</span><br><span class="line">            w-&gt;kcontrols = kzalloc(w-&gt;num_kcontrols *</span><br><span class="line">                        <span class="keyword">sizeof</span>(struct snd_kcontrol *),</span><br><span class="line">                        GFP_KERNEL);</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">switch</span>(w-&gt;id) &#123;</span><br><span class="line">        <span class="keyword">case</span> snd_soc_dapm_switch:</span><br><span class="line">        <span class="keyword">case</span> snd_soc_dapm_mixer:</span><br><span class="line">        <span class="keyword">case</span> snd_soc_dapm_mixer_named_ctl:</span><br><span class="line">            dapm_new_mixer(w);	<span class="comment">// 主要是创建里面的kcontrol</span></span><br><span class="line">                <span class="keyword">for</span> (i = <span class="number">0</span>; i &lt; w-&gt;num_kcontrols; i++) &#123;</span><br><span class="line">                    ret = dapm_create_or_share_kcontrol(w, i);</span><br><span class="line">                        snd_soc_cnew(&amp;w-&gt;kcontrol_news[kci], <span class="literal">NULL</span>, name, prefix);</span><br><span class="line">                        ret = snd_ctl_add(card, kcontrol);</span><br><span class="line">                &#125;</span><br><span class="line"></span><br><span class="line">            <span class="keyword">break</span>;</span><br><span class="line">        <span class="keyword">case</span> snd_soc_dapm_mux:</span><br><span class="line">        <span class="keyword">case</span> snd_soc_dapm_demux:</span><br><span class="line">            dapm_new_mux(w);</span><br><span class="line">            <span class="keyword">break</span>;</span><br><span class="line">        <span class="keyword">case</span> snd_soc_dapm_pga:</span><br><span class="line">        <span class="keyword">case</span> snd_soc_dapm_out_drv:</span><br><span class="line">            dapm_new_pga(w);</span><br><span class="line">            <span class="keyword">break</span>;</span><br><span class="line">        <span class="keyword">case</span> snd_soc_dapm_dai_link:</span><br><span class="line">            dapm_new_dai_link(w);</span><br><span class="line">            <span class="keyword">break</span>;</span><br><span class="line">        <span class="keyword">default</span>:</span><br><span class="line">            <span class="keyword">break</span>;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        dapm_mark_dirty(w, <span class="string">"new widget"</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    dapm_power_widgets(card, SND_SOC_DAPM_STREAM_NOP);</span><br></pre></td></tr></table></figure></p>
+<h1 id="route"><a href="#route" class="headerlink" title="route"></a>route</h1><h2 id="定义-1"><a href="#定义-1" class="headerlink" title="定义"></a>定义</h2><p>声明使用哪些widget组成route</p>
+<blockquote>
+<p>sink &lt;- control &lt;- source</p>
+</blockquote>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">static</span> <span class="keyword">const</span> <span class="class"><span class="keyword">struct</span> <span class="title">snd_soc_dapm_route</span> <span class="title">audio_paths</span>[] = &#123;</span></span><br><span class="line">    &#123; <span class="string">"Left Boost Mixer"</span>, <span class="string">"LINPUT1 Switch"</span>, <span class="string">"LINPUT1"</span> &#125;</span><br><span class="line">    ...</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<h2 id="注册-1"><a href="#注册-1" class="headerlink" title="注册"></a>注册</h2><p>将创建path，path有3个链表<br><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">snd_soc_dapm_path</span> &#123;</span></span><br><span class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">list_head</span> <span class="title">list_source</span>;</span></span><br><span class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">list_head</span> <span class="title">list_sink</span>;</span></span><br><span class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">list_head</span> <span class="title">list</span>;</span></span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure></p>
+<p>任何一个widget都可以找到对应的path，从而找到source/sink<br><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">list_add(&amp;path-&gt;<span class="built_in">list</span>, &amp;dapm-&gt;card-&gt;paths);</span><br><span class="line">list_add(&amp;path-&gt;list_sink, &amp;wsink-&gt;sources);</span><br><span class="line">list_add(&amp;path-&gt;list_source, &amp;wsource-&gt;sinks);</span><br></pre></td></tr></table></figure></p>
+<ol>
+<li>根据route创建path</li>
+<li>设置path-&gt;connect<br> 2.1 NULL：直连<br> 2.2 其他需要读取reg来判断<br><img src="/2018/03/20/Linux/audio/asoc/dapm/widget_route/add_path.png" alt="widget_route"><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br></pre></td><td class="code"><pre><span class="line">snd_soc_dapm_add_routes(dapm, audio_paths, ARRAY_SIZE(audio_paths));</span><br><span class="line">    <span class="keyword">for</span> (i = <span class="number">0</span>; i &lt; num; i++) &#123;</span><br><span class="line">        ret = snd_soc_dapm_add_route(dapm, route);</span><br><span class="line">            sink = route-&gt;sink;</span><br><span class="line">            source = route-&gt;source;</span><br><span class="line">            <span class="comment">/* </span></span><br><span class="line"><span class="comment">			 * 通过name在dapm-&gt;card-&gt;widgets链表中搜索，将结果保存到wsink和wsource中</span></span><br><span class="line"><span class="comment">			 * 因为route中定义的只是字符串而已，需要widget的支撑</span></span><br><span class="line"><span class="comment">			 */</span></span><br><span class="line">            list_for_each_entry(w, &amp;dapm-&gt;card-&gt;widgets, <span class="built_in">list</span>) &#123;</span><br><span class="line">                <span class="keyword">if</span> (!wsink &amp;&amp; !(<span class="built_in">strcmp</span>(w-&gt;name, sink))) &#123;</span><br><span class="line">                    wtsink = w;</span><br><span class="line">                    <span class="keyword">if</span> (w-&gt;dapm == dapm)</span><br><span class="line">                        wsink = w;</span><br><span class="line">                    <span class="keyword">continue</span>;</span><br><span class="line">                &#125;</span><br><span class="line">                <span class="keyword">if</span> (!wsource &amp;&amp; !(<span class="built_in">strcmp</span>(w-&gt;name, source))) &#123;</span><br><span class="line">                    wtsource = w;</span><br><span class="line">                    <span class="keyword">if</span> (w-&gt;dapm == dapm)</span><br><span class="line">                        wsource = w;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">            </span><br><span class="line">            <span class="comment">// 创建path</span></span><br><span class="line">            path = kzalloc(<span class="keyword">sizeof</span>(struct snd_soc_dapm_path), GFP_KERNEL);</span><br><span class="line">            <span class="comment">// 2. path中保存widget信息</span></span><br><span class="line">            path-&gt;source = wsource;</span><br><span class="line">            path-&gt;sink = wsink;</span><br><span class="line">            path-&gt;connected = route-&gt;connected;</span><br><span class="line">            </span><br><span class="line">            <span class="comment">// &#123; "Left Input Mixer", NULL, "LINPUT1", &#125;</span></span><br><span class="line">            <span class="keyword">if</span> (control == <span class="literal">NULL</span>) &#123;	<span class="comment">// NULL: 直连</span></span><br><span class="line">                list_add(&amp;path-&gt;<span class="built_in">list</span>, &amp;dapm-&gt;card-&gt;paths);</span><br><span class="line">                <span class="comment">// 1. widget中保存path信息</span></span><br><span class="line">                list_add(&amp;path-&gt;list_sink, &amp;wsink-&gt;sources);</span><br><span class="line">                list_add(&amp;path-&gt;list_source, &amp;wsource-&gt;sinks);</span><br><span class="line">                path-&gt;connect = <span class="number">1</span>;</span><br><span class="line">                <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="comment">// 不是直连的情况，看wsink类型</span></span><br><span class="line">            <span class="keyword">switch</span> (wsink-&gt;id) &#123;</span><br><span class="line">            <span class="keyword">case</span> snd_soc_dapm_adc:</span><br><span class="line">            <span class="keyword">case</span> snd_soc_dapm_dac:</span><br><span class="line">            <span class="keyword">case</span> snd_soc_dapm_pga:</span><br><span class="line">            <span class="keyword">case</span> snd_soc_dapm_out_drv:</span><br><span class="line">            <span class="keyword">case</span> snd_soc_dapm_input:</span><br><span class="line">            <span class="keyword">case</span> snd_soc_dapm_output:</span><br><span class="line">            <span class="keyword">case</span> snd_soc_dapm_micbias:</span><br><span class="line">            <span class="keyword">case</span> snd_soc_dapm_vmid:</span><br><span class="line">            <span class="keyword">case</span> snd_soc_dapm_pre:</span><br><span class="line">            <span class="keyword">case</span> snd_soc_dapm_post:</span><br><span class="line">            <span class="keyword">case</span> snd_soc_dapm_supply:</span><br><span class="line">            <span class="keyword">case</span> snd_soc_dapm_aif_in:</span><br><span class="line">            <span class="keyword">case</span> snd_soc_dapm_aif_out:</span><br><span class="line">                list_add(&amp;path-&gt;<span class="built_in">list</span>, &amp;dapm-&gt;card-&gt;paths);</span><br><span class="line">                list_add(&amp;path-&gt;list_sink, &amp;wsink-&gt;sources);</span><br><span class="line">                list_add(&amp;path-&gt;list_source, &amp;wsource-&gt;sinks);</span><br><span class="line">                path-&gt;connect = <span class="number">1</span>;</span><br><span class="line">                <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">            <span class="comment">// mux</span></span><br><span class="line">            <span class="keyword">case</span> snd_soc_dapm_mux:</span><br><span class="line">            <span class="keyword">case</span> snd_soc_dapm_virt_mux:</span><br><span class="line">            <span class="keyword">case</span> snd_soc_dapm_value_mux:</span><br><span class="line">                ret = dapm_connect_mux(dapm, wsource, wsink, path, control,</span><br><span class="line">                    &amp;wsink-&gt;kcontrol_news[<span class="number">0</span>]);</span><br><span class="line">                <span class="keyword">break</span>;</span><br><span class="line">            <span class="comment">// mixer</span></span><br><span class="line">            <span class="keyword">case</span> snd_soc_dapm_switch:</span><br><span class="line">            <span class="keyword">case</span> snd_soc_dapm_mixer:</span><br><span class="line">            <span class="keyword">case</span> snd_soc_dapm_mixer_named_ctl:</span><br><span class="line">                ret = dapm_connect_mixer(dapm, wsource, wsink, path, control);	<span class="comment">// control == "LINPUT1 Switch"</span></span><br><span class="line">                <span class="keyword">break</span>;</span><br><span class="line">            <span class="keyword">case</span> snd_soc_dapm_hp:</span><br><span class="line">            <span class="keyword">case</span> snd_soc_dapm_mic:</span><br><span class="line">            <span class="keyword">case</span> snd_soc_dapm_line:</span><br><span class="line">            <span class="keyword">case</span> snd_soc_dapm_spk:</span><br><span class="line">                list_add(&amp;path-&gt;<span class="built_in">list</span>, &amp;dapm-&gt;card-&gt;paths);</span><br><span class="line">                list_add(&amp;path-&gt;list_sink, &amp;wsink-&gt;sources);</span><br><span class="line">                list_add(&amp;path-&gt;list_source, &amp;wsource-&gt;sinks);</span><br><span class="line">                path-&gt;connect = <span class="number">0</span>;</span><br><span class="line">                <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">            &#125;</span><br><span class="line">            </span><br><span class="line">        route++;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+</li>
+</ol>
+<p>读取寄存器进行判断这个path是否connect<br><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">dapm_connect_mixer</span><br><span class="line">    <span class="keyword">for</span> (i = <span class="number">0</span>; i &lt; dest-&gt;num_kcontrols; i++) &#123;	<span class="comment">// 3个kcontrol</span></span><br><span class="line">        <span class="keyword">if</span> (!<span class="built_in">strcmp</span>(control_name, dest-&gt;kcontrol_news[i].name)) &#123;</span><br><span class="line">            list_add(&amp;path-&gt;<span class="built_in">list</span>, &amp;dapm-&gt;card-&gt;paths);</span><br><span class="line">            list_add(&amp;path-&gt;list_sink, &amp;dest-&gt;sources);</span><br><span class="line">            list_add(&amp;path-&gt;list_source, &amp;src-&gt;sinks);</span><br><span class="line">            path-&gt;name = dest-&gt;kcontrol_news[i].name;	<span class="comment">// LINPUTX Switch</span></span><br><span class="line">            </span><br><span class="line">            <span class="comment">// 通过读取指定寄存器来判断是否connect</span></span><br><span class="line">            dapm_set_path_status(dest, path, i);</span><br><span class="line">                <span class="class"><span class="keyword">struct</span> <span class="title">soc_mixer_control</span> *<span class="title">mc</span> = (<span class="title">struct</span> <span class="title">soc_mixer_control</span> *)</span></span><br><span class="line"><span class="class">					<span class="title">w</span>-&gt;<span class="title">kcontrol_news</span>[<span class="title">i</span>].<span class="title">private_value</span>;</span></span><br><span class="line">                <span class="keyword">unsigned</span> <span class="keyword">int</span> reg = mc-&gt;reg;	<span class="comment">// 例如WM8960_LINPATH</span></span><br><span class="line">                val = snd_soc_read(w-&gt;codec, reg);</span><br><span class="line">                val = (val &gt;&gt; shift) &amp; mask;</span><br><span class="line">                <span class="keyword">if</span> ((invert &amp;&amp; !val) || (!invert &amp;&amp; val))</span><br><span class="line">                    p-&gt;connect = <span class="number">1</span>;</span><br><span class="line">                <span class="keyword">else</span></span><br><span class="line">                    p-&gt;connect = <span class="number">0</span>;</span><br><span class="line">            <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/03/07/Linux/power/suspend顺序/" rel="next" title="suspend顺序">
+                <i class="fa fa-chevron-left"></i> suspend顺序
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/03/22/Linux/audio/asoc/dapm/complete-path/" rel="prev" title="complete_path">
+                complete_path <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+    </div>
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="/images/avatar.jpg" alt="zhouzuoyu">
+            
+              <p class="site-author-name" itemprop="name">zhouzuoyu</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">148</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">40</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+            </nav>
+          
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="mailto:hi@zhouzuoyu.com" target="_blank" title="E-Mail">
+                      
+                        <i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#源码"><span class="nav-number">1.</span> <span class="nav-text">源码</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#注册widget和path"><span class="nav-number">2.</span> <span class="nav-text">注册widget和path</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#widget"><span class="nav-number">3.</span> <span class="nav-text">widget</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#定义"><span class="nav-number">3.1.</span> <span class="nav-text">定义</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#注册"><span class="nav-number">3.2.</span> <span class="nav-text">注册</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#process"><span class="nav-number">3.3.</span> <span class="nav-text">process</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#route"><span class="nav-number">4.</span> <span class="nav-text">route</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#定义-1"><span class="nav-number">4.1.</span> <span class="nav-text">定义</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#注册-1"><span class="nav-number">4.2.</span> <span class="nav-text">注册</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">zhouzuoyu</span>
+
+  
+
+  
+</div>
+
+
+
+
+
+
+
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.0.2"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.0.2"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.0.2"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.0.2"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.0.2"></script>
+
+
+
+  
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+  <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+  <script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+  
+  <script type="text/javascript">
+    var GUEST = ['nick','mail','link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(item=>{
+      return GUEST.indexOf(item)>-1;
+    });
+    new Valine({
+        el: '#comments' ,
+        verify: false,
+        notify: false,
+        appId: 's0qrr1SUElrMtB7IkHDhyquu-gzGzoHsz',
+        appKey: 'rzVUQV27Lo9pBzD6UvCMAzR6',
+        placeholder: 'Just go go',
+        avatar:'mm',
+        guest_info:guest,
+        pageSize:'10' || 10,
+    });
+  </script>
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+<script>
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

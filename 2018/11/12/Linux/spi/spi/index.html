@@ -1,0 +1,874 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=6.0.2" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=6.0.2">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=6.0.2">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=6.0.2">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=6.0.2" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '6.0.2',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  
+  <meta name="keywords" content="Hexo, NexT">
+
+
+<meta name="description" content="代码架构分为spi设备驱动和spi总线驱动  设备驱动：drivers\spi\spidev.c总线驱动：drivers\spi\spi-imx.c：只需要设置一些回调函数即可">
+<meta property="og:type" content="article">
+<meta property="og:title" content="spi驱动">
+<meta property="og:url" content="http://zhouzuoyu.github.io/2018/11/12/Linux/spi/spi/index.html">
+<meta property="og:site_name" content="千里之行始于足下">
+<meta property="og:description" content="代码架构分为spi设备驱动和spi总线驱动  设备驱动：drivers\spi\spidev.c总线驱动：drivers\spi\spi-imx.c：只需要设置一些回调函数即可">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2019-12-05T06:40:38.307Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="spi驱动">
+<meta name="twitter:description" content="代码架构分为spi设备驱动和spi总线驱动  设备驱动：drivers\spi\spidev.c总线驱动：drivers\spi\spi-imx.c：只需要设置一些回调函数即可">
+
+
+
+
+
+
+  <link rel="canonical" href="http://zhouzuoyu.github.io/2018/11/12/Linux/spi/spi/">
+
+
+  <title>spi驱动 | 千里之行始于足下</title>
+  
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"> <div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">千里之行始于足下</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-home"></i> <br>首页</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-th"></i> <br>分类</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>归档</a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+  
+
+
+
+ </div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://zhouzuoyu.github.io/2018/11/12/Linux/spi/spi/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="zhouzuoyu">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="千里之行始于足下">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">spi驱动</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-11-12T13:22:00+08:00">2018-11-12</time>
+            
+
+            
+            
+
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/Linux/" itemprop="url" rel="index"><span itemprop="name">Linux</span></a></span>
+
+                
+                
+                  ， 
+                
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/Linux/spi/" itemprop="url" rel="index"><span itemprop="name">spi</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2018/11/12/Linux/spi/spi/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2018/11/12/Linux/spi/spi/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="代码架构"><a href="#代码架构" class="headerlink" title="代码架构"></a>代码架构</h1><p>分为spi设备驱动和spi总线驱动</p>
+<blockquote>
+<p>设备驱动：drivers\spi\spidev.c<br>总线驱动：drivers\spi\spi-imx.c：只需要设置一些回调函数即可</p>
+</blockquote>
+<a id="more"></a>
+<h1 id="spi设备驱动"><a href="#spi设备驱动" class="headerlink" title="spi设备驱动"></a>spi设备驱动</h1><h2 id="创建-dev-spidev0-0节点"><a href="#创建-dev-spidev0-0节点" class="headerlink" title="创建/dev/spidev0.0节点"></a>创建/dev/spidev0.0节点</h2><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">static</span> <span class="keyword">int</span> __<span class="function">init <span class="title">spidev_init</span><span class="params">(<span class="keyword">void</span>)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    status = register_chrdev(SPIDEV_MAJOR, <span class="string">"spi"</span>, &amp;spidev_fops);</span><br><span class="line">    spidev_class = class_create(THIS_MODULE, <span class="string">"spidev"</span>);</span><br><span class="line">    status = spi_register_driver(&amp;spidev_spi_driver);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">int</span> <span class="title">spidev_probe</span><span class="params">(struct spi_device *spi)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    spidev-&gt;devt = MKDEV(SPIDEV_MAJOR, minor);</span><br><span class="line">    dev = device_create(spidev_class, &amp;spi-&gt;dev, spidev-&gt;devt,</span><br><span class="line">                spidev, <span class="string">"spidev%d.%d"</span>,	<span class="comment">// /dev/spidev0.0</span></span><br><span class="line">                spi-&gt;master-&gt;bus_num, spi-&gt;chip_select);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="spidev-write"><a href="#spidev-write" class="headerlink" title="spidev_write"></a>spidev_write</h2><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">static</span> <span class="keyword">const</span> <span class="class"><span class="keyword">struct</span> <span class="title">file_operations</span> <span class="title">spidev_fops</span> = &#123;</span></span><br><span class="line">    .owner =	THIS_MODULE,</span><br><span class="line">    .write =	spidev_write,</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">static</span> <span class="keyword">ssize_t</span></span><br><span class="line">spidev_write(struct file *filp, <span class="keyword">const</span> <span class="keyword">char</span> __user *buf,</span><br><span class="line">        <span class="keyword">size_t</span> count, <span class="keyword">loff_t</span> *f_pos)</span><br><span class="line">&#123;</span><br><span class="line">    missing = copy_from_user(spidev-&gt;tx_buffer, buf, count);</span><br><span class="line">    status = spidev_sync_write(spidev, count);</span><br><span class="line">        spi_message_add_tail(&amp;t, &amp;m);</span><br><span class="line">        <span class="keyword">return</span> spidev_sync(spidev, &amp;m);</span><br><span class="line">            spi_async(spidev-&gt;spi, message);</span><br><span class="line">                ret = __spi_async(spi, message);</span><br><span class="line">                    <span class="keyword">return</span> master-&gt;transfer(spi, message);	<span class="comment">// 即spi_queued_transfer</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h1 id="spi总线驱动"><a href="#spi总线驱动" class="headerlink" title="spi总线驱动"></a>spi总线驱动</h1><h2 id="总线驱动"><a href="#总线驱动" class="headerlink" title="总线驱动"></a>总线驱动</h2><p>只需要设置spi_imx-&gt;bitbang.txrx_bufs等回调函数，使用通用接口层提供的队列化框架<br><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">int</span> <span class="title">spi_imx_probe</span><span class="params">(struct platform_device *pdev)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="comment">// 设置回调函数</span></span><br><span class="line">    spi_imx-&gt;bitbang.chipselect = spi_imx_chipselect;</span><br><span class="line">    spi_imx-&gt;bitbang.setup_transfer = spi_imx_setupxfer;</span><br><span class="line">    spi_imx-&gt;bitbang.txrx_bufs = spi_imx_transfer;</span><br><span class="line">    spi_imx-&gt;bitbang.master-&gt;setup = spi_imx_setup;</span><br><span class="line">    spi_imx-&gt;bitbang.master-&gt;cleanup = spi_imx_cleanup;</span><br><span class="line">    spi_imx-&gt;bitbang.master-&gt;prepare_message = spi_imx_prepare_message;</span><br><span class="line">    spi_imx-&gt;bitbang.master-&gt;unprepare_message = spi_imx_unprepare_message;</span><br><span class="line">    spi_imx-&gt;bitbang.master-&gt;mode_bits = SPI_CPOL | SPI_CPHA | SPI_CS_HIGH;</span><br><span class="line"></span><br><span class="line">    ret = spi_bitbang_start(&amp;spi_imx-&gt;bitbang);</span><br><span class="line">        master-&gt;prepare_transfer_hardware = spi_bitbang_prepare_hardware;</span><br><span class="line">        master-&gt;unprepare_transfer_hardware = spi_bitbang_unprepare_hardware;</span><br><span class="line">        master-&gt;transfer_one_message = spi_bitbang_transfer_one;</span><br><span class="line"></span><br><span class="line">        ret = spi_register_master(spi_master_get(master));</span><br><span class="line">            <span class="keyword">if</span> (master-&gt;transfer)</span><br><span class="line">                dev_info(dev, <span class="string">"master is unqueued, this is deprecated\n"</span>);</span><br><span class="line">            <span class="keyword">else</span> &#123;	<span class="comment">// master没有设置transfer，使用通用接口层提供的队列化框架</span></span><br><span class="line">                status = spi_master_initialize_queue(master);</span><br><span class="line">                    master-&gt;transfer = spi_queued_transfer;	<span class="comment">// 设置master-&gt;transfer</span></span><br><span class="line"></span><br><span class="line">                    ret = spi_init_queue(master);</span><br><span class="line">                        init_kthread_work(&amp;master-&gt;pump_messages, spi_pump_messages);</span><br><span class="line">                    ret = spi_start_queue(master);					</span><br><span class="line">                        queue_kthread_work(&amp;master-&gt;kworker, &amp;master-&gt;pump_messages);</span><br><span class="line">            &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h2 id="框架"><a href="#框架" class="headerlink" title="框架"></a>框架</h2><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">int</span> <span class="title">spi_queued_transfer</span><span class="params">(struct spi_device *spi, struct spi_message *msg)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">return</span> __spi_queued_transfer(spi, msg, <span class="literal">true</span>);</span><br><span class="line">        list_add_tail(&amp;msg-&gt;<span class="built_in">queue</span>, &amp;master-&gt;<span class="built_in">queue</span>);</span><br><span class="line">        <span class="keyword">if</span> (!master-&gt;busy &amp;&amp; need_pump)</span><br><span class="line">            queue_kthread_work(&amp;master-&gt;kworker, &amp;master-&gt;pump_messages);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">void</span> <span class="title">spi_pump_messages</span><span class="params">(struct kthread_work *work)</span></span></span><br><span class="line"><span class="function">	__<span class="title">spi_pump_messages</span><span class="params">(master, <span class="literal">true</span>)</span></span>;</span><br><span class="line">        ret = master-&gt;transfer_one_message(master, master-&gt;cur_msg);	<span class="comment">// spi_bitbang_transfer_one</span></span><br><span class="line">            list_for_each_entry(t, &amp;m-&gt;transfers, transfer_list) &#123;</span><br><span class="line">                status = bitbang-&gt;setup_transfer(spi, t);</span><br><span class="line">                bitbang-&gt;chipselect(spi, BITBANG_CS_ACTIVE);</span><br><span class="line">                status = bitbang-&gt;txrx_bufs(spi, t);	<span class="comment">// 调用总线驱动的回调函数</span></span><br><span class="line">                bitbang-&gt;chipselect(spi, BITBANG_CS_INACTIVE);</span><br><span class="line">            &#125;</span><br></pre></td></tr></table></figure>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/11/12/Linux/i2c/app/" rel="next" title="i2c app">
+                <i class="fa fa-chevron-left"></i> i2c app
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/11/12/Env/ubuntu/配置/" rel="prev" title="ubuntu配置">
+                ubuntu配置 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+    </div>
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="/images/avatar.jpg" alt="zhouzuoyu">
+            
+              <p class="site-author-name" itemprop="name">zhouzuoyu</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">148</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">40</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+            </nav>
+          
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="mailto:hi@zhouzuoyu.com" target="_blank" title="E-Mail">
+                      
+                        <i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#代码架构"><span class="nav-number">1.</span> <span class="nav-text">代码架构</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#spi设备驱动"><span class="nav-number">2.</span> <span class="nav-text">spi设备驱动</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#创建-dev-spidev0-0节点"><span class="nav-number">2.1.</span> <span class="nav-text">创建/dev/spidev0.0节点</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#spidev-write"><span class="nav-number">2.2.</span> <span class="nav-text">spidev_write</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#spi总线驱动"><span class="nav-number">3.</span> <span class="nav-text">spi总线驱动</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#总线驱动"><span class="nav-number">3.1.</span> <span class="nav-text">总线驱动</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#框架"><span class="nav-number">3.2.</span> <span class="nav-text">框架</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">zhouzuoyu</span>
+
+  
+
+  
+</div>
+
+
+
+
+
+
+
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.0.2"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.0.2"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.0.2"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.0.2"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.0.2"></script>
+
+
+
+  
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+  <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+  <script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+  
+  <script type="text/javascript">
+    var GUEST = ['nick','mail','link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(item=>{
+      return GUEST.indexOf(item)>-1;
+    });
+    new Valine({
+        el: '#comments' ,
+        verify: false,
+        notify: false,
+        appId: 's0qrr1SUElrMtB7IkHDhyquu-gzGzoHsz',
+        appKey: 'rzVUQV27Lo9pBzD6UvCMAzR6',
+        placeholder: 'Just go go',
+        avatar:'mm',
+        guest_info:guest,
+        pageSize:'10' || 10,
+    });
+  </script>
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+<script>
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

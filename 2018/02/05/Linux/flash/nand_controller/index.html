@@ -1,0 +1,867 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=6.0.2" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=6.0.2">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=6.0.2">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=6.0.2">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=6.0.2" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '6.0.2',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  
+  <meta name="keywords" content="Hexo, NexT">
+
+
+<meta name="description" content="源码S3c2410.c (android-5.0.2\linux-3.0.86\drivers\mtd\nand) 功能两部分1：设置nand_controller　　填充nand_chip结构体(nand的读写函数…)2：scan板载的nand ic(read id)">
+<meta property="og:type" content="article">
+<meta property="og:title" content="nand(2)_controller">
+<meta property="og:url" content="http://zhouzuoyu.github.io/2018/02/05/Linux/flash/nand_controller/index.html">
+<meta property="og:site_name" content="千里之行始于足下">
+<meta property="og:description" content="源码S3c2410.c (android-5.0.2\linux-3.0.86\drivers\mtd\nand) 功能两部分1：设置nand_controller　　填充nand_chip结构体(nand的读写函数…)2：scan板载的nand ic(read id)">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2019-12-05T06:40:38.307Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="nand(2)_controller">
+<meta name="twitter:description" content="源码S3c2410.c (android-5.0.2\linux-3.0.86\drivers\mtd\nand) 功能两部分1：设置nand_controller　　填充nand_chip结构体(nand的读写函数…)2：scan板载的nand ic(read id)">
+
+
+
+
+
+
+  <link rel="canonical" href="http://zhouzuoyu.github.io/2018/02/05/Linux/flash/nand_controller/">
+
+
+  <title>nand(2)_controller | 千里之行始于足下</title>
+  
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"> <div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">千里之行始于足下</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-home"></i> <br>首页</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-th"></i> <br>分类</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>归档</a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+  
+
+
+
+ </div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://zhouzuoyu.github.io/2018/02/05/Linux/flash/nand_controller/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="zhouzuoyu">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="千里之行始于足下">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">nand(2)_controller</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-02-05T12:00:00+08:00">2018-02-05</time>
+            
+
+            
+            
+
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/Linux/" itemprop="url" rel="index"><span itemprop="name">Linux</span></a></span>
+
+                
+                
+                  ， 
+                
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/Linux/flash/" itemprop="url" rel="index"><span itemprop="name">flash</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2018/02/05/Linux/flash/nand_controller/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2018/02/05/Linux/flash/nand_controller/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="源码"><a href="#源码" class="headerlink" title="源码"></a>源码</h1><p>S3c2410.c (android-5.0.2\linux-3.0.86\drivers\mtd\nand)</p>
+<h1 id="功能"><a href="#功能" class="headerlink" title="功能"></a>功能</h1><p>两部分<br>1：设置nand_controller<br>　　填充nand_chip结构体(nand的读写函数…)<br>2：scan板载的nand ic(read id)<br><a id="more"></a></p>
+<h1 id="源码分析"><a href="#源码分析" class="headerlink" title="源码分析"></a>源码分析</h1><h2 id="配置options"><a href="#配置options" class="headerlink" title="配置options"></a>配置options</h2><p>machine code: Mach-mini2440.c (linux-4.13.1\arch\arm\mach-s3c24xx)<br>配置nand controller的一些选项<br><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/*</span></span><br><span class="line"><span class="comment"> * chip-&gt;options两部分决定：</span></span><br><span class="line"><span class="comment">	在machine端设置是0, 在s3c2410.c中设置为NAND_SKIP_BBTSCAN</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">static</span> <span class="class"><span class="keyword">struct</span> <span class="title">s3c2410_nand_set</span> <span class="title">mini2440_nand_sets</span>[] __<span class="title">initdata</span> = &#123;</span></span><br><span class="line">    [<span class="number">0</span>] = &#123;</span><br><span class="line">        .options = <span class="number">0</span>,	<span class="comment">// 因为options在mini2440_nand_sets没有设置，所以是0</span></span><br><span class="line">    &#125;,</span><br><span class="line">&#125;;</span><br><span class="line"><span class="keyword">static</span> <span class="class"><span class="keyword">struct</span> <span class="title">s3c2410_platform_nand</span> <span class="title">mini2440_nand_info</span> __<span class="title">initdata</span> = &#123;</span></span><br><span class="line">    .sets = mini2440_nand_sets,</span><br><span class="line">&#125;;</span><br><span class="line">s3c_nand_set_platdata(&amp;mini2440_nand_info);</span><br><span class="line">    s3c_set_platdata(nand, <span class="keyword">sizeof</span>(struct s3c2410_platform_nand), &amp;s3c_device_nand);</span><br><span class="line">        pdev-&gt;dev.platform_data = npd;	<span class="comment">// s3c_device_nand.dev.platform_data = &amp;mini2440_nand_info;</span></span><br><span class="line"><span class="comment">// nand controller code: S3c2410.c (linux-4.13.1\drivers\mtd\nand)</span></span><br><span class="line">s3c24xx_nand_probe(struct platform_device *pdev)</span><br><span class="line">    plat = to_nand_plat(pdev);</span><br><span class="line">        <span class="keyword">return</span> dev-&gt;platform_data;</span><br><span class="line">    sets = (plat != <span class="literal">NULL</span>) ? plat-&gt;sets : <span class="literal">NULL</span>;	<span class="comment">// sets = dev-&gt;platform_data-&gt;sets</span></span><br><span class="line">    s3c2410_nand_init_chip(info, nmtd, sets);</span><br><span class="line">        chip-&gt;options = <span class="built_in">set</span>-&gt;options;		<span class="comment">// chip-&gt;options = 0</span></span><br><span class="line">    s3c2410_nand_update_chip(info, nmtd);</span><br><span class="line">        chip-&gt;options |= NAND_SKIP_BBTSCAN;	<span class="comment">// chip-&gt;options = NAND_SKIP_BBTSCAN;</span></span><br></pre></td></tr></table></figure></p>
+<h2 id="注册nand-controller"><a href="#注册nand-controller" class="headerlink" title="注册nand controller"></a>注册nand controller</h2><p>主要是填充nand_chip的成员<br>将nand_scan拆分为两部分<br>1: nand_scan_ident: nand_set_defaults/nand_detect<br>2: nand_scan_tail: ecc setting/bbt<br><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br></pre></td><td class="code"><pre><span class="line">s3c24xx_nand_probe</span><br><span class="line">    <span class="comment">/* </span></span><br><span class="line"><span class="comment">	 * 填充chip结构体，设置各个相关成员函数</span></span><br><span class="line"><span class="comment">	 * 根据各个平台来设置</span></span><br><span class="line"><span class="comment">	 */</span></span><br><span class="line">    s3c2410_nand_init_chip(info, nmtd, sets);</span><br><span class="line">        <span class="class"><span class="keyword">struct</span> <span class="title">nand_chip</span> *<span class="title">chip</span> = &amp;<span class="title">nmtd</span>-&gt;<span class="title">chip</span>;</span></span><br><span class="line">            <span class="comment">// 填充chip结构体的成员函数</span></span><br><span class="line">            chip-&gt;options	= <span class="built_in">set</span>-&gt;options;	<span class="comment">// mini2440_nand_sets.options = 0;</span></span><br><span class="line">            chip-&gt;read_buf  = s3c2440_nand_read_buf;</span><br><span class="line">            chip-&gt;write_buf	= s3c2440_nand_write_buf;	<span class="comment">// writesl(info-&gt;regs + S3C2440_NFDATA, buf, len &gt;&gt; 2);</span></span><br><span class="line">            chip-&gt;select_chip  = s3c2410_nand_select_chip;</span><br><span class="line">            chip-&gt;IO_ADDR_W = regs + S3C2440_NFDATA;</span><br><span class="line">            chip-&gt;cmd_ctrl  = s3c2440_nand_hwcontrol;</span><br><span class="line">            chip-&gt;IO_ADDR_R = chip-&gt;IO_ADDR_W;</span><br><span class="line">            <span class="comment">/*</span></span><br><span class="line"><span class="comment">			 * ecc</span></span><br><span class="line"><span class="comment">			 * plat = to_nand_plat(pdev);</span></span><br><span class="line"><span class="comment">			 * info-&gt;platform	= plat;</span></span><br><span class="line"><span class="comment">			 * mini2440_nand_info.ecc_mode = NAND_ECC_SOFT</span></span><br><span class="line"><span class="comment">			 */</span></span><br><span class="line">            chip-&gt;ecc.mode = info-&gt;platform-&gt;ecc_mode;	<span class="comment">// NAND_ECC_SOFT</span></span><br><span class="line">    <span class="comment">/*</span></span><br><span class="line"><span class="comment">	 * nand_scan拆分为两个part</span></span><br><span class="line"><span class="comment">	 * part 1: nand_scan_ident</span></span><br><span class="line"><span class="comment">	 * part 2: nand_scan_tail</span></span><br><span class="line"><span class="comment">	 */</span></span><br><span class="line">    <span class="comment">// part 1: 发0x90读id命令，和Nand_ids.c进行match，获得pagesize/blocksize/oob size...</span></span><br><span class="line">    nand_scan_ident(mtd, (sets) ? sets-&gt;nr_chips : <span class="number">1</span>, <span class="literal">NULL</span>);	<span class="comment">// 传入mtd和table，如传入的时NULL，则使用默认表 nand_flash_ids</span></span><br><span class="line">        <span class="comment">// nand controller没有填充的配置上default</span></span><br><span class="line">        nand_set_defaults(chip);</span><br><span class="line">            busw = chip-&gt;options &amp; NAND_BUSWIDTH_16;</span><br><span class="line">            chip-&gt;cmdfunc = nand_command;</span><br><span class="line">            chip-&gt;scan_bbt = nand_default_bbt;</span><br><span class="line">            chip-&gt;block_bad = nand_block_bad;</span><br><span class="line">            chip-&gt;read_byte = busw ? nand_read_byte16 : nand_read_byte;	<span class="comment">// nand_read_byte</span></span><br><span class="line">        <span class="comment">/*</span></span><br><span class="line"><span class="comment">		 * 读取nand id，进行match，进而获得nand的各项参数，回填到chip中(chip-&gt;mtd-&gt;writesize)</span></span><br><span class="line"><span class="comment">		 * 发0x90命令，得到id[]，主要是4th Cycle，该字节有nand的各项参数</span></span><br><span class="line"><span class="comment">		 */</span></span><br><span class="line">        nand_detect(chip, table);</span><br><span class="line">            <span class="comment">// read id</span></span><br><span class="line">            nand_reset(chip, <span class="number">0</span>);</span><br><span class="line">            chip-&gt;select_chip(mtd, <span class="number">0</span>);</span><br><span class="line">            chip-&gt;cmdfunc(mtd, NAND_CMD_READID, <span class="number">0x00</span>, <span class="number">-1</span>);	<span class="comment">// nand_command</span></span><br><span class="line">            maf_id = chip-&gt;read_byte(mtd);	<span class="comment">// EC: Maker Code(samsung)</span></span><br><span class="line">            dev_id = chip-&gt;read_byte(mtd);	<span class="comment">// 0xDA: device code</span></span><br><span class="line">            <span class="comment">// 为了稳定，又读了一次，返回值保存在chip-&gt;id.data中</span></span><br><span class="line">            u8 *id_data = chip-&gt;id.data;</span><br><span class="line">            chip-&gt;cmdfunc(mtd, NAND_CMD_READID, <span class="number">0x00</span>, <span class="number">-1</span>);</span><br><span class="line">            <span class="keyword">for</span> (i = <span class="number">0</span>; i &lt; <span class="number">8</span>; i++)</span><br><span class="line">                id_data[i] = chip-&gt;read_byte(mtd);</span><br><span class="line">            <span class="comment">// match Maker Code</span></span><br><span class="line">            manufacturer = nand_get_manufacturer(maf_id);	<span class="comment">// 1</span></span><br><span class="line">            chip-&gt;manufacturer.desc = manufacturer;</span><br><span class="line">            <span class="comment">/*</span></span><br><span class="line"><span class="comment">			 * nand_flash_ids中有两种类型的表，match到详细表，则找到了，否则还要nand_manufacturer_detect配合再找一次</span></span><br><span class="line"><span class="comment">			 *	1: 详细表: 	&#123;"TC58NVG0S3E 1G 3.3V 8-bit",</span></span><br><span class="line"><span class="comment">								&#123; .id = &#123;0x98, 0xd1, 0x90, 0x15, 0x76, 0x14, 0x01, 0x00&#125; &#125;,</span></span><br><span class="line"><span class="comment">									SZ_2K, SZ_128, SZ_128K, 0, 8, 64, NAND_ECC_INFO(1, SZ_512),</span></span><br><span class="line"><span class="comment">									2 &#125;</span></span><br><span class="line"><span class="comment">				2: other: EXTENDED_ID_NAND("NAND 256MiB 3,3V 8-bit",  0xDA, 256, LP_OPTIONS),</span></span><br><span class="line"><span class="comment">			 */</span></span><br><span class="line">            type = nand_flash_ids;</span><br><span class="line">            <span class="keyword">for</span> (; type-&gt;name != <span class="literal">NULL</span>; type++) &#123;</span><br><span class="line">                <span class="keyword">if</span> (is_full_id_nand(type)) &#123;	<span class="comment">// type-&gt;id_len</span></span><br><span class="line">                    <span class="comment">// 读id的方式</span></span><br><span class="line">                    <span class="keyword">if</span> (find_full_id_nand(chip, type))</span><br><span class="line">                        <span class="keyword">goto</span> ident_done;</span><br><span class="line">                &#125; <span class="keyword">else</span> <span class="keyword">if</span> (dev_id == type-&gt;dev_id) &#123;</span><br><span class="line">                    <span class="keyword">break</span>;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">            </span><br><span class="line">            chip-&gt;chipsize = (<span class="keyword">uint64_t</span>)type-&gt;chipsize &lt;&lt; <span class="number">20</span>;	<span class="comment">// 256 &lt;&lt; 20</span></span><br><span class="line">            </span><br><span class="line">            <span class="comment">/*</span></span><br><span class="line"><span class="comment">			 * 参见上面分析，根据id获得板上nand各项指标</span></span><br><span class="line"><span class="comment">			 * writesize/oobsize/erasesize/buswidth</span></span><br><span class="line"><span class="comment">			 */</span></span><br><span class="line">            nand_manufacturer_detect(chip);					<span class="comment">// 2</span></span><br><span class="line">                chip-&gt;manufacturer.desc-&gt;ops-&gt;detect(chip);</span><br><span class="line">            </span><br><span class="line">            <span class="comment">/*</span></span><br><span class="line"><span class="comment">			 * The initial invalid block(s) status is defined by the 1st byte in the spare area</span></span><br><span class="line"><span class="comment">			 * Check "FFh" at the column address 2048 of the 1st and 2nd page in the block</span></span><br><span class="line"><span class="comment">			 * 大页: oob的第1个字节</span></span><br><span class="line"><span class="comment">			 * 小页: oob的第6个字节</span></span><br><span class="line"><span class="comment">			 */</span></span><br><span class="line">            nand_decode_bbm_options(chip);</span><br><span class="line">                chip-&gt;badblockpos = NAND_LARGE_BADBLOCK_POS;	<span class="comment">// 0</span></span><br><span class="line">            </span><br><span class="line">            chip-&gt;page_shift = ffs(mtd-&gt;writesize) - <span class="number">1</span>;	<span class="comment">// page_shift = 11: 2^11 = 2048 = 2KB</span></span><br><span class="line">            chip-&gt;bbt_erase_shift = chip-&gt;phys_erase_shift = ffs(mtd-&gt;erasesize) - <span class="number">1</span>;	<span class="comment">// bbt_erase_shift = 17: 2^17 = 128K</span></span><br><span class="line">            </span><br><span class="line">            chip-&gt;cmdfunc = nand_command_lp;</span><br><span class="line">            </span><br><span class="line">            nand_manufacturer_init(chip);</span><br><span class="line">                chip-&gt;options |= NAND_SAMSUNG_LP_OPTIONS;</span><br><span class="line"></span><br><span class="line">        mtd-&gt;size = i * chip-&gt;chipsize;	<span class="comment">// 268435456 == 256M</span></span><br><span class="line">            </span><br><span class="line">    <span class="comment">// 更新ecc相关信息</span></span><br><span class="line">    s3c2410_nand_update_chip(info, nmtd);</span><br><span class="line">        <span class="keyword">case</span> NAND_ECC_SOFT:	<span class="comment">// mach代码中确定</span></span><br><span class="line">            chip-&gt;ecc.algo = NAND_ECC_HAMMING;</span><br><span class="line">            <span class="keyword">break</span>;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// part 2: 主要是为了建立bbt</span></span><br><span class="line">    nand_scan_tail(mtd);</span><br><span class="line">        <span class="comment">// 设置ecc相关</span></span><br><span class="line">        <span class="keyword">case</span> NAND_ECC_SOFT:</span><br><span class="line">            <span class="keyword">case</span> NAND_ECC_HAMMING:</span><br><span class="line">                ecc-&gt;read_oob = nand_read_oob_std;</span><br><span class="line">                    chip-&gt;cmdfunc(mtd, NAND_CMD_READOOB, <span class="number">0</span>, page);</span><br><span class="line">                    chip-&gt;read_buf(mtd, chip-&gt;oob_poi, mtd-&gt;oobsize);	<span class="comment">// 保存在chip-&gt;oob_poi中</span></span><br><span class="line">                <span class="keyword">break</span>;</span><br><span class="line">            <span class="keyword">break</span>;</span><br><span class="line">        <span class="comment">// <span class="doctag">FIXME:</span> 建立bbt</span></span><br><span class="line">        ret = chip-&gt;scan_bbt(mtd);	<span class="comment">// nand_default_bbt</span></span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 建立分区表</span></span><br><span class="line">    s3c2410_nand_add_partition(info, nmtd, sets);</span><br><span class="line">        mtd_device_parse_register(mtdinfo, <span class="literal">NULL</span>, <span class="literal">NULL</span>, <span class="built_in">set</span>-&gt;partitions, <span class="built_in">set</span>-&gt;nr_partitions);</span><br></pre></td></tr></table></figure></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/02/05/Linux/flash/overview/" rel="next" title="nand(1)_overview">
+                <i class="fa fa-chevron-left"></i> nand(1)_overview
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/02/05/Linux/flash/nand_device/" rel="prev" title="nand(3)_device">
+                nand(3)_device <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+    </div>
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="/images/avatar.jpg" alt="zhouzuoyu">
+            
+              <p class="site-author-name" itemprop="name">zhouzuoyu</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">148</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">40</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+            </nav>
+          
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="mailto:hi@zhouzuoyu.com" target="_blank" title="E-Mail">
+                      
+                        <i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#源码"><span class="nav-number">1.</span> <span class="nav-text">源码</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#功能"><span class="nav-number">2.</span> <span class="nav-text">功能</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#源码分析"><span class="nav-number">3.</span> <span class="nav-text">源码分析</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#配置options"><span class="nav-number">3.1.</span> <span class="nav-text">配置options</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#注册nand-controller"><span class="nav-number">3.2.</span> <span class="nav-text">注册nand controller</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">zhouzuoyu</span>
+
+  
+
+  
+</div>
+
+
+
+
+
+
+
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.0.2"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.0.2"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.0.2"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.0.2"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.0.2"></script>
+
+
+
+  
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+  <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+  <script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+  
+  <script type="text/javascript">
+    var GUEST = ['nick','mail','link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(item=>{
+      return GUEST.indexOf(item)>-1;
+    });
+    new Valine({
+        el: '#comments' ,
+        verify: false,
+        notify: false,
+        appId: 's0qrr1SUElrMtB7IkHDhyquu-gzGzoHsz',
+        appKey: 'rzVUQV27Lo9pBzD6UvCMAzR6',
+        placeholder: 'Just go go',
+        avatar:'mm',
+        guest_info:guest,
+        pageSize:'10' || 10,
+    });
+  </script>
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+<script>
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

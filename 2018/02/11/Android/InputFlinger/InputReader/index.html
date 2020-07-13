@@ -1,0 +1,876 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=6.0.2" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=6.0.2">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=6.0.2">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=6.0.2">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=6.0.2" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '6.0.2',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  
+  <meta name="keywords" content="Hexo, NexT">
+
+
+<meta name="description" content="源码InputReader.cpp (native\services\inputflinger) 功能以按键类事件阐述1：读取　　eventhub读取事件(mEventHub-&amp;gt;getEvents)2：处理　　scancode-&amp;gt;AKEYCODE_XXX(kl)　　systemKey预处理(PhoneWindowManager.interceptKeyBeforeQueueing 音量">
+<meta property="og:type" content="article">
+<meta property="og:title" content="InputFlinger(3)_InputReader">
+<meta property="og:url" content="http://zhouzuoyu.github.io/2018/02/11/Android/InputFlinger/InputReader/index.html">
+<meta property="og:site_name" content="千里之行始于足下">
+<meta property="og:description" content="源码InputReader.cpp (native\services\inputflinger) 功能以按键类事件阐述1：读取　　eventhub读取事件(mEventHub-&amp;gt;getEvents)2：处理　　scancode-&amp;gt;AKEYCODE_XXX(kl)　　systemKey预处理(PhoneWindowManager.interceptKeyBeforeQueueing 音量">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2019-12-05T06:40:38.303Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="InputFlinger(3)_InputReader">
+<meta name="twitter:description" content="源码InputReader.cpp (native\services\inputflinger) 功能以按键类事件阐述1：读取　　eventhub读取事件(mEventHub-&amp;gt;getEvents)2：处理　　scancode-&amp;gt;AKEYCODE_XXX(kl)　　systemKey预处理(PhoneWindowManager.interceptKeyBeforeQueueing 音量">
+
+
+
+
+
+
+  <link rel="canonical" href="http://zhouzuoyu.github.io/2018/02/11/Android/InputFlinger/InputReader/">
+
+
+  <title>InputFlinger(3)_InputReader | 千里之行始于足下</title>
+  
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"> <div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">千里之行始于足下</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-home"></i> <br>首页</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-th"></i> <br>分类</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>归档</a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+  
+
+
+
+ </div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://zhouzuoyu.github.io/2018/02/11/Android/InputFlinger/InputReader/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="zhouzuoyu">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="千里之行始于足下">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">InputFlinger(3)_InputReader</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-02-11T12:00:00+08:00">2018-02-11</time>
+            
+
+            
+            
+
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/Android/" itemprop="url" rel="index"><span itemprop="name">Android</span></a></span>
+
+                
+                
+                  ， 
+                
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/Android/InputFlinger/" itemprop="url" rel="index"><span itemprop="name">InputFlinger</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2018/02/11/Android/InputFlinger/InputReader/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2018/02/11/Android/InputFlinger/InputReader/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="源码"><a href="#源码" class="headerlink" title="源码"></a>源码</h1><p>InputReader.cpp (native\services\inputflinger)</p>
+<h1 id="功能"><a href="#功能" class="headerlink" title="功能"></a>功能</h1><p>以按键类事件阐述<br>1：读取<br>　　eventhub读取事件(mEventHub-&gt;getEvents)<br>2：处理<br>　　scancode-&gt;AKEYCODE_XXX(kl)<br>　　systemKey预处理(PhoneWindowManager.interceptKeyBeforeQueueing 音量键/电源键/耳机键…)，是否设置POLICY_FLAG_PASS_TO_USER<br>　　放入到mInboundQueue</p>
+<a id="more"></a>
+<h1 id="源码分析"><a href="#源码分析" class="headerlink" title="源码分析"></a>源码分析</h1><h2 id="InputReaderThread"><a href="#InputReaderThread" class="headerlink" title="InputReaderThread"></a>InputReaderThread</h2><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">InputReaderThread::threadLoop()</span><br><span class="line">    mReader-&gt;loopOnce();</span><br></pre></td></tr></table></figure>
+<p>1: 调用eventhub接口读取/dev/input/事件<br>2: 交于不同的process分别处理<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">InputReader::loopOnce()</span><br><span class="line">    <span class="comment">// get events</span></span><br><span class="line">    <span class="keyword">size_t</span> count = mEventHub-&gt;getEvents(timeoutMillis, mEventBuffer, EVENT_BUFFER_SIZE);	<span class="comment">// mEventBuffer存放kernel上报的event数据</span></span><br><span class="line">    <span class="comment">// process</span></span><br><span class="line">    processEventsLocked(mEventBuffer, count);</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">const</span> RawEvent* rawEvent = rawEvents; count;) &#123;</span><br><span class="line">            <span class="keyword">int32_t</span> deviceId = rawEvent-&gt;deviceId;</span><br><span class="line">            <span class="comment">// 处理event数据</span></span><br><span class="line">            <span class="keyword">while</span> (batchSize &lt; count) &#123;</span><br><span class="line">                <span class="keyword">if</span> (rawEvent[batchSize].type &gt;= EventHubInterface::FIRST_SYNTHETIC_EVENT</span><br><span class="line">                        || rawEvent[batchSize].deviceId != deviceId) &#123;</span><br><span class="line">                    <span class="keyword">break</span>;</span><br><span class="line">                &#125;</span><br><span class="line">                batchSize += <span class="number">1</span>;</span><br><span class="line">            &#125;</span><br><span class="line">            processEventsForDeviceLocked(deviceId, rawEvent, batchSize);</span><br><span class="line">            	<span class="comment">// 不同的device使用不同的process</span></span><br><span class="line">            	<span class="keyword">ssize_t</span> deviceIndex = mDevices.indexOfKey(deviceId);</span><br><span class="line">            	InputDevice* device = mDevices.valueAt(deviceIndex);</span><br><span class="line">            	device-&gt;process(rawEvents, count);</span><br><span class="line">        &#125;</span><br></pre></td></tr></table></figure></p>
+<h2 id="process"><a href="#process" class="headerlink" title="process"></a>process</h2><p>按键类事件的process方法<br>1：scancode-&gt;AKEYCODE_XXX(kl文件)<br>2: 构建成NotifyKeyArgs传递给InputDispatcher<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line">KeyboardInputMapper::process(<span class="keyword">const</span> RawEvent* rawEvent)</span><br><span class="line">    <span class="keyword">switch</span> (rawEvent-&gt;type) &#123;</span><br><span class="line">    <span class="keyword">case</span> EV_KEY: &#123;</span><br><span class="line">        <span class="keyword">int32_t</span> scanCode = rawEvent-&gt;code;	<span class="comment">// linux report key</span></span><br><span class="line">        <span class="comment">// 1：scancode -&gt; AKEYCODE_XXX</span></span><br><span class="line">        getEventHub()-&gt;mapKey(getDeviceId(), scanCode, usageCode, &amp;keyCode, &amp;flags);	<span class="comment">// key 158   BACK: 则scancode对应158，keyCode是AKEYCODE_BACK，flag为0</span></span><br><span class="line">            Device* device = getDeviceLocked(deviceId);</span><br><span class="line">            <span class="comment">// 一般都是从keyLayoutMap中获取对应关系</span></span><br><span class="line">            <span class="keyword">if</span> (device-&gt;keyMap.haveKeyLayout()) &#123;</span><br><span class="line">                <span class="keyword">if</span> (!device-&gt;keyMap.keyLayoutMap-&gt;mapKey(scanCode, usageCode, outKeycode, outFlags)) &#123;</span><br><span class="line">                	<span class="keyword">const</span> Key* key = getKey(scanCode, usageCode);	<span class="comment">// 使用scancode得到AKEYCODE_XXX</span></span><br><span class="line">                	*outKeyCode = key-&gt;keyCode;</span><br><span class="line">    				*outFlags = key-&gt;flags;</span><br><span class="line">                    <span class="keyword">return</span> NO_ERROR;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">            </span><br><span class="line">        <span class="comment">// 2：构建NotifyKeyArgs给input_dispatch</span></span><br><span class="line">        processKey(rawEvent-&gt;when, rawEvent-&gt;value != <span class="number">0</span>, keyCode, scanCode, flags);</span><br><span class="line">            <span class="function">NotifyKeyArgs <span class="title">args</span><span class="params">(when, getDeviceId(), mSource, policyFlags, down ? AKEY_EVENT_ACTION_DOWN : AKEY_EVENT_ACTION_UP, AKEY_EVENT_FLAG_FROM_SYSTEM, keyCode, scanCode, newMetaState, downTime)</span></span>;	<span class="comment">// policyFlags：0</span></span><br><span class="line">            getListener()-&gt;notifyKey(&amp;args);	<span class="comment">// InputDispatcher::notifyKey</span></span><br><span class="line">        <span class="keyword">break</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h3 id="getListener"><a href="#getListener" class="headerlink" title="getListener"></a>getListener</h3><p>InputReader的Listener是InputDispatcher</p>
+<blockquote>
+<p>base\services\core\jni\com_android_server_input_InputManagerService.cpp</p>
+</blockquote>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">NativeInputManager::NativeInputManager</span><br><span class="line">    sp&lt;EventHub&gt; eventHub = <span class="keyword">new</span> EventHub();	<span class="comment">// new</span></span><br><span class="line">    mInputManager = <span class="keyword">new</span> InputManager(eventHub, <span class="keyword">this</span>, <span class="keyword">this</span>);</span><br><span class="line">        mDispatcher = <span class="keyword">new</span> InputDispatcher(dispatcherPolicy);</span><br><span class="line">        mReader = <span class="keyword">new</span> InputReader(eventHub, readerPolicy, mDispatcher);</span><br><span class="line">            InputReader::InputReader(<span class="keyword">const</span> sp&lt;EventHubInterface&gt;&amp; eventHub,</span><br><span class="line">                    <span class="keyword">const</span> sp&lt;InputReaderPolicyInterface&gt;&amp; policy,</span><br><span class="line">                    <span class="keyword">const</span> sp&lt;InputListenerInterface&gt;&amp; listener) :	<span class="comment">// mReader的listener就是mDispatcher</span></span><br></pre></td></tr></table></figure>
+<h3 id="notifyKey"><a href="#notifyKey" class="headerlink" title="notifyKey"></a>notifyKey</h3><p>1: 调用PhoneWindowManager.interceptKeyBeforeQueueing进行处理(电话静音/截屏…)，不能处理则设置POLICY_FLAG_PASS_TO_USER<br>2: 把按键事件放入到mInboundQueue中<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line">InputDispatcher::notifyKey(<span class="keyword">const</span> NotifyKeyArgs* args)</span><br><span class="line">    <span class="keyword">uint32_t</span> policyFlags = args-&gt;policyFlags;</span><br><span class="line">    policyFlags |= POLICY_FLAG_TRUSTED; <span class="comment">// policyFlags: POLICY_FLAG_TRUSTED</span></span><br><span class="line">    <span class="comment">/*</span></span><br><span class="line"><span class="comment">     * NativeInputManager::interceptKeyBeforeQueueing</span></span><br><span class="line"><span class="comment">     * callback PhoneWindowManager.interceptKeyBeforeQueueing对特殊按键做预先处理，不是该种类则设置为POLICY_FLAG_PASS_TO_USER</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    mPolicy-&gt;interceptKeyBeforeQueueing(&amp;event, <span class="comment">/*byref*/</span> policyFlags);	<span class="comment">// policyFlags是一个引用，所以可以改变</span></span><br><span class="line">        jobject keyEventObj = android_view_KeyEvent_fromNative(env, keyEvent);	<span class="comment">// keyEvent转换下</span></span><br><span class="line">        <span class="keyword">if</span> (keyEventObj) &#123;</span><br><span class="line">        	<span class="comment">/*</span></span><br><span class="line"><span class="comment">        	 * PhoneWindowManager.interceptKeyBeforeQueueing</span></span><br><span class="line"><span class="comment">        	 * 该函数可以处理的事件则处理，不能处理的则设置POLICY_FLAG_PASS_TO_USER</span></span><br><span class="line"><span class="comment">        	 */</span></span><br><span class="line">            wmActions = env-&gt;CallIntMethod(mServiceObj,</span><br><span class="line">                    gServiceClassInfo.interceptKeyBeforeQueueing,</span><br><span class="line">                    keyEventObj, policyFlags);	</span><br><span class="line"></span><br><span class="line">            android_view_KeyEvent_recycle(env, keyEventObj);</span><br><span class="line">            env-&gt;DeleteLocalRef(keyEventObj);</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 如果该事件在PhoneWindowManager.interceptKeyBeforeQueueing中不能处理，则设置policyFlags为POLICY_FLAG_PASS_TO_USER</span></span><br><span class="line">        handleInterceptActions(wmActions, when, <span class="comment">/*byref*/</span> policyFlags);</span><br><span class="line">        	<span class="keyword">if</span> (wmActions &amp; WM_ACTION_PASS_TO_USER)</span><br><span class="line">                policyFlags |= POLICY_FLAG_PASS_TO_USER;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 放入到mInboundQueue中</span></span><br><span class="line">    KeyEntry* newEntry = <span class="keyword">new</span> KeyEntry(args-&gt;eventTime,</span><br><span class="line">            args-&gt;deviceId, args-&gt;source, policyFlags,</span><br><span class="line">            args-&gt;action, flags, keyCode, args-&gt;scanCode,</span><br><span class="line">            metaState, repeatCount, args-&gt;downTime);	<span class="comment">// policyFlags: 0</span></span><br><span class="line">    needWake = enqueueInboundEventLocked(newEntry);</span><br><span class="line">    	mInboundQueue.enqueueAtTail(entry);	<span class="comment">// 将KeyEntry放到mInboundQueue</span></span><br></pre></td></tr></table></figure></p>
+<h3 id="interceptKeyBeforeQueueing"><a href="#interceptKeyBeforeQueueing" class="headerlink" title="interceptKeyBeforeQueueing"></a>interceptKeyBeforeQueueing</h3><p>处理VOLUME_XXX/POWER/耳机键…<br>截屏/电话静音/电话挂断<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br></pre></td><td class="code"><pre><span class="line">PhoneWindowManager.interceptKeyBeforeQueueing</span><br><span class="line">    <span class="comment">// check该键值是否是GlobalKey，如果是GlobalKey则直接return</span></span><br><span class="line">    <span class="keyword">if</span> (mGlobalKeyManager.shouldHandleGlobalKey(keyCode, event)) &#123;</span><br><span class="line">        <span class="keyword">if</span> (isWakeKey) &#123;</span><br><span class="line">            mPowerManager.wakeUp(event.getEventTime());</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> result;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// Handle special keys.</span></span><br><span class="line">    <span class="keyword">switch</span> (keyCode) &#123;</span><br><span class="line">   		<span class="keyword">case</span> KeyEvent.KEYCODE_VOLUME_DOWN:</span><br><span class="line">        <span class="keyword">case</span> KeyEvent.KEYCODE_VOLUME_UP:</span><br><span class="line">        <span class="keyword">case</span> KeyEvent.KEYCODE_VOLUME_MUTE: &#123;</span><br><span class="line">        	<span class="comment">// 按下音量下键，是触发截屏流程的必要条件</span></span><br><span class="line">            <span class="keyword">if</span> (keyCode == KeyEvent.KEYCODE_VOLUME_DOWN) &#123;</span><br><span class="line">                <span class="keyword">if</span> (down) &#123;</span><br><span class="line">                    <span class="keyword">if</span> (interactive &amp;&amp; !mVolumeDownKeyTriggered</span><br><span class="line">                            &amp;&amp; (event.getFlags() &amp; KeyEvent.FLAG_FALLBACK) == <span class="number">0</span>) &#123;</span><br><span class="line">                        mVolumeDownKeyTriggered = <span class="keyword">true</span>;</span><br><span class="line">                        mVolumeDownKeyTime = event.getDownTime();</span><br><span class="line">                        mVolumeDownKeyConsumedByScreenshotChord = <span class="keyword">false</span>;</span><br><span class="line">                        cancelPendingPowerKeyAction();</span><br><span class="line">                        interceptScreenshotChord();</span><br><span class="line">                        	mHandler.postDelayed(mScreenshotRunnable, getScreenshotChordLongPressDelay());</span><br><span class="line">                        		takeScreenshot();	<span class="comment">// 截屏</span></span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="comment">// 有电话进来时按下VOLUME_DOWN/VOLUME_UP/VOLUME_MUTE则静音</span></span><br><span class="line">            <span class="keyword">if</span> (down) &#123;</span><br><span class="line">            	<span class="keyword">if</span> (telecomManager.isRinging()) &#123;</span><br><span class="line">                    telecomManager.silenceRinger();</span><br><span class="line"></span><br><span class="line">                    result &amp;= ~ACTION_PASS_TO_USER;	<span class="comment">// 不传递给APP</span></span><br><span class="line">                    <span class="keyword">break</span>;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">case</span> KeyEvent.KEYCODE_POWER: &#123;</span><br><span class="line">            result &amp;= ~ACTION_PASS_TO_USER;	<span class="comment">// power键不会传递给APP</span></span><br><span class="line">            <span class="keyword">if</span> (down) &#123;</span><br><span class="line">            	<span class="comment">// 按下电源键，是触发截屏流程的必要条件</span></span><br><span class="line">                <span class="keyword">if</span> (interactive &amp;&amp; !mPowerKeyTriggered</span><br><span class="line">                        &amp;&amp; (event.getFlags() &amp; KeyEvent.FLAG_FALLBACK) == <span class="number">0</span>) &#123;</span><br><span class="line">                    mPowerKeyTriggered = <span class="keyword">true</span>;</span><br><span class="line">                    mPowerKeyTime = event.getDownTime();</span><br><span class="line">                    interceptScreenshotChord();</span><br><span class="line">                &#125;</span><br><span class="line"></span><br><span class="line">                <span class="comment">// 静音/挂断电话</span></span><br><span class="line">                TelecomManager telecomManager = getTelecommService();</span><br><span class="line">                <span class="keyword">boolean</span> hungUp = <span class="keyword">false</span>;</span><br><span class="line">                <span class="keyword">if</span> (telecomManager != <span class="keyword">null</span>) &#123;</span><br><span class="line">                    <span class="keyword">if</span> (telecomManager.isRinging()) &#123;</span><br><span class="line">                        telecomManager.silenceRinger();</span><br><span class="line">                    &#125; <span class="keyword">else</span> <span class="keyword">if</span> ((mIncallPowerBehavior</span><br><span class="line">                            &amp; Settings.Secure.INCALL_POWER_BUTTON_BEHAVIOR_HANGUP) != <span class="number">0</span></span><br><span class="line">                            &amp;&amp; telecomManager.isInCall() &amp;&amp; interactive) &#123;</span><br><span class="line">                        hungUp = telecomManager.endCall();</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">break</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/02/11/Android/InputFlinger/OverView/" rel="next" title="InputFlinger(1)_Overview">
+                <i class="fa fa-chevron-left"></i> InputFlinger(1)_Overview
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/02/11/Android/InputFlinger/InputDispatcher和PhoneWindowManager的联系/" rel="prev" title="InputFlinger(7)_InputDispatcher和PhoneWindowManager的联系">
+                InputFlinger(7)_InputDispatcher和PhoneWindowManager的联系 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+    </div>
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="/images/avatar.jpg" alt="zhouzuoyu">
+            
+              <p class="site-author-name" itemprop="name">zhouzuoyu</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">148</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">40</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+            </nav>
+          
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="mailto:hi@zhouzuoyu.com" target="_blank" title="E-Mail">
+                      
+                        <i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#源码"><span class="nav-number">1.</span> <span class="nav-text">源码</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#功能"><span class="nav-number">2.</span> <span class="nav-text">功能</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#源码分析"><span class="nav-number">3.</span> <span class="nav-text">源码分析</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#InputReaderThread"><span class="nav-number">3.1.</span> <span class="nav-text">InputReaderThread</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#process"><span class="nav-number">3.2.</span> <span class="nav-text">process</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#getListener"><span class="nav-number">3.2.1.</span> <span class="nav-text">getListener</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#notifyKey"><span class="nav-number">3.2.2.</span> <span class="nav-text">notifyKey</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#interceptKeyBeforeQueueing"><span class="nav-number">3.2.3.</span> <span class="nav-text">interceptKeyBeforeQueueing</span></a></li></ol></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">zhouzuoyu</span>
+
+  
+
+  
+</div>
+
+
+
+
+
+
+
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.0.2"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.0.2"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.0.2"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.0.2"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.0.2"></script>
+
+
+
+  
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+  <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+  <script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+  
+  <script type="text/javascript">
+    var GUEST = ['nick','mail','link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(item=>{
+      return GUEST.indexOf(item)>-1;
+    });
+    new Valine({
+        el: '#comments' ,
+        verify: false,
+        notify: false,
+        appId: 's0qrr1SUElrMtB7IkHDhyquu-gzGzoHsz',
+        appKey: 'rzVUQV27Lo9pBzD6UvCMAzR6',
+        placeholder: 'Just go go',
+        avatar:'mm',
+        guest_info:guest,
+        pageSize:'10' || 10,
+    });
+  </script>
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+<script>
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

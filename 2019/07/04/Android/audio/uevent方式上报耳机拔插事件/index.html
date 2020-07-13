@@ -1,0 +1,862 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=6.0.2" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=6.0.2">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=6.0.2">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=6.0.2">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=6.0.2" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '6.0.2',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  
+  <meta name="keywords" content="Hexo, NexT">
+
+
+<meta name="description" content="frameworks\base\services\core\java\com\android\server\WiredAccessoryManager.java   创建uevent的监听listcheck /sys/class/switch/h2w/state节点在不在如果该节点都不在，则没必要监听h2w事件  1234567891011121314151617// 创建监测listmObse">
+<meta property="og:type" content="article">
+<meta property="og:title" content="uevent方式上报耳机拔插事件">
+<meta property="og:url" content="http://zhouzuoyu.github.io/2019/07/04/Android/audio/uevent方式上报耳机拔插事件/index.html">
+<meta property="og:site_name" content="千里之行始于足下">
+<meta property="og:description" content="frameworks\base\services\core\java\com\android\server\WiredAccessoryManager.java   创建uevent的监听listcheck /sys/class/switch/h2w/state节点在不在如果该节点都不在，则没必要监听h2w事件  1234567891011121314151617// 创建监测listmObse">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2019-12-05T06:40:38.307Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="uevent方式上报耳机拔插事件">
+<meta name="twitter:description" content="frameworks\base\services\core\java\com\android\server\WiredAccessoryManager.java   创建uevent的监听listcheck /sys/class/switch/h2w/state节点在不在如果该节点都不在，则没必要监听h2w事件  1234567891011121314151617// 创建监测listmObse">
+
+
+
+
+
+
+  <link rel="canonical" href="http://zhouzuoyu.github.io/2019/07/04/Android/audio/uevent方式上报耳机拔插事件/">
+
+
+  <title>uevent方式上报耳机拔插事件 | 千里之行始于足下</title>
+  
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"> <div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">千里之行始于足下</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-home"></i> <br>首页</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-th"></i> <br>分类</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>归档</a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+  
+
+
+
+ </div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://zhouzuoyu.github.io/2019/07/04/Android/audio/uevent方式上报耳机拔插事件/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="zhouzuoyu">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="千里之行始于足下">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">uevent方式上报耳机拔插事件</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-07-04T10:12:00+08:00">2019-07-04</time>
+            
+
+            
+            
+
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/Android/" itemprop="url" rel="index"><span itemprop="name">Android</span></a></span>
+
+                
+                
+                  ， 
+                
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/Android/audio/" itemprop="url" rel="index"><span itemprop="name">audio</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2019/07/04/Android/audio/uevent方式上报耳机拔插事件/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2019/07/04/Android/audio/uevent方式上报耳机拔插事件/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <blockquote>
+<p>frameworks\base\services\core\java\com\android\server\WiredAccessoryManager.java</p>
+</blockquote>
+<ol>
+<li>创建uevent的监听list<br>check /sys/class/switch/h2w/state节点在不在<br>如果该节点都不在，则没必要监听h2w事件</li>
+</ol>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 创建监测list</span></span><br><span class="line">mObserver = <span class="keyword">new</span> WiredAccessoryObserver();</span><br><span class="line">    mUEventInfo = makeObservedUEventList();</span><br><span class="line">        <span class="comment">// 添加uevent检测list</span></span><br><span class="line">        <span class="comment">// /sys/class/switch/xxx/state	(h2w/usb_audio/hdmi_audio/hdmi)</span></span><br><span class="line">        List&lt;UEventInfo&gt; retVal = <span class="keyword">new</span> ArrayList&lt;UEventInfo&gt;();</span><br><span class="line">        <span class="comment">// Monitor h2w</span></span><br><span class="line">        <span class="keyword">if</span> (!mUseDevInputEventForAudioJack) &#123;</span><br><span class="line">            uei = <span class="keyword">new</span> UEventInfo(NAME_H2W, BIT_HEADSET, BIT_HEADSET_NO_MIC, BIT_LINEOUT);	<span class="comment">// "h2w", mState1Bits=BIT_HEADSET, mState2Bits=BIT_HEADSET_NO_MIC, mStateNbits=BIT_LINEOUT</span></span><br><span class="line">            <span class="keyword">if</span> (uei.checkSwitchExists()) &#123;</span><br><span class="line">                File f = <span class="keyword">new</span> File(getSwitchStatePath());</span><br><span class="line">                    <span class="keyword">return</span> String.format(Locale.US, <span class="string">"/sys/class/switch/%s/state"</span>, mDevName);	<span class="comment">// /sys/class/switch/h2w/state</span></span><br><span class="line">                <span class="keyword">return</span> f.exists();</span><br><span class="line"></span><br><span class="line">                retVal.add(uei);	<span class="comment">// 添加到list中</span></span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br></pre></td></tr></table></figure>
+<a id="more"></a>
+<ol start="2">
+<li>startObserving<br>创建线程，监听uevent<br>有指定的uevent事件则回调onUEvent</li>
+</ol>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/*</span></span><br><span class="line"><span class="comment"> * 开始监测</span></span><br><span class="line"><span class="comment"> * 1: 监听过滤uevent</span></span><br><span class="line"><span class="comment"> * 2: 有指定事件则回调onUEvent</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">onSystemReady</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    mObserver.init();</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; mUEventInfo.size(); ++i) &#123;</span><br><span class="line">            UEventInfo uei = mUEventInfo.get(i);</span><br><span class="line">            startObserving(<span class="string">"DEVPATH="</span>+uei.getDevPath());	<span class="comment">// match字段，例如 DEVPATH=/devices/virtual/switch/h2w，监听带上报带此类信息的uevent</span></span><br><span class="line">        &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>frameworks\base\core\java\android\os\UEventObserver.java</p>
+</blockquote>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">abstract</span> <span class="class"><span class="keyword">class</span> <span class="title">UEventObserver</span> </span>&#123;</span><br><span class="line">    <span class="comment">// 启动线程，监听过滤uevent事件，然后sendEvent</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">final</span> <span class="keyword">void</span> <span class="title">startObserving</span><span class="params">(String match)</span> </span>&#123;</span><br><span class="line">        <span class="comment">// 创建并启动thread，监听所有的uevent事件</span></span><br><span class="line">        <span class="keyword">final</span> UEventThread t = getThread();</span><br><span class="line">            sThread = <span class="keyword">new</span> UEventThread();</span><br><span class="line">            sThread.start();	<span class="comment">// 调用UEventThread.run</span></span><br><span class="line">                <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</span><br><span class="line">                    nativeSetup();	<span class="comment">// socket(PF_NETLINK, SOCK_DGRAM, NETLINK_KOBJECT_UEVENT);</span></span><br><span class="line"></span><br><span class="line">                    <span class="keyword">while</span> (<span class="keyword">true</span>) &#123;</span><br><span class="line">                        String message = nativeWaitForNextEvent();	<span class="comment">// poll &amp; recv &amp; match</span></span><br><span class="line">                        <span class="keyword">if</span> (message != <span class="keyword">null</span>) &#123;</span><br><span class="line">                            sendEvent(message); <span class="comment">// UEventThread.sendEvent</span></span><br><span class="line">                        &#125;</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;</span><br><span class="line">        <span class="comment">// 设置指定事件，nativeWaitForNextEvent中会进行过滤</span></span><br><span class="line">        t.addObserver(match, <span class="keyword">this</span>);</span><br><span class="line">            mKeysAndObservers.add(match);</span><br><span class="line">            mKeysAndObservers.add(observer);</span><br><span class="line">            nativeAddMatch(match);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="class"><span class="keyword">class</span> <span class="title">UEventThread</span> <span class="keyword">extends</span> <span class="title">Thread</span> </span>&#123;</span><br><span class="line">        <span class="comment">// 回调WiredAccessoryObserver.onUEvent</span></span><br><span class="line">        <span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">sendEvent</span><span class="params">(String message)</span> </span>&#123;</span><br><span class="line">            <span class="comment">// 再次确认message有没有match字段</span></span><br><span class="line">            <span class="keyword">synchronized</span> (mKeysAndObservers) &#123;</span><br><span class="line">                <span class="keyword">final</span> <span class="keyword">int</span> N = mKeysAndObservers.size();</span><br><span class="line">                <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; N; i += <span class="number">2</span>) &#123;</span><br><span class="line">                    <span class="keyword">final</span> String key = (String)mKeysAndObservers.get(i);</span><br><span class="line">                    <span class="keyword">if</span> (message.contains(key)) &#123;</span><br><span class="line">                        <span class="keyword">final</span> UEventObserver observer =</span><br><span class="line">                                (UEventObserver)mKeysAndObservers.get(i + <span class="number">1</span>);</span><br><span class="line">                        mTempObserversToSignal.add(observer);</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            <span class="keyword">if</span> (!mTempObserversToSignal.isEmpty()) &#123;</span><br><span class="line">                <span class="keyword">final</span> UEvent event = <span class="keyword">new</span> UEvent(message);	<span class="comment">// 根据message重新构建UEvent</span></span><br><span class="line">                <span class="keyword">final</span> <span class="keyword">int</span> N = mTempObserversToSignal.size();</span><br><span class="line">                <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; N; i++) &#123;</span><br><span class="line">                    <span class="keyword">final</span> UEventObserver observer = mTempObserversToSignal.get(i);</span><br><span class="line">                    observer.onUEvent(event);	<span class="comment">// 回调WiredAccessoryObserver.onUEvent</span></span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<ol start="3">
+<li>调用updateLocked，uevent和input方式都会调用这个函数</li>
+</ol>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 如果获取到相应事件则交给此函数处理</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">WiredAccessoryObserver</span> <span class="keyword">extends</span> <span class="title">UEventObserver</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onUEvent</span><span class="params">(UEventObserver.UEvent event)</span> </span>&#123;</span><br><span class="line">        String devPath = event.get(<span class="string">"DEVPATH"</span>);</span><br><span class="line">        String name = event.get(<span class="string">"SWITCH_NAME"</span>);</span><br><span class="line">        <span class="keyword">int</span> state = Integer.parseInt(event.get(<span class="string">"SWITCH_STATE"</span>));</span><br><span class="line">        <span class="keyword">synchronized</span> (mLock) &#123;</span><br><span class="line">            updateStateLocked(devPath, name, state);</span><br><span class="line">                <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; mUEventInfo.size(); ++i) &#123;</span><br><span class="line">                    UEventInfo uei = mUEventInfo.get(i);</span><br><span class="line">                    <span class="keyword">if</span> (devPath.equals(uei.getDevPath())) &#123;</span><br><span class="line">                        updateLocked(name, uei.computeNewHeadsetState(mHeadsetState, state));	<span class="comment">// 也是调用updateLocked，后续流程和input方式上报耳机拔插事件一致</span></span><br><span class="line">                        <span class="keyword">return</span>;</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<ol start="4">
+<li>updateLocked<br>主要是将事件给AudioService广播出去</li>
+</ol>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">final</span> <span class="class"><span class="keyword">class</span> <span class="title">WiredAccessoryManager</span> <span class="keyword">implements</span> <span class="title">WiredAccessoryCallbacks</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">WiredAccessoryManager</span><span class="params">(Context context, InputManagerService inputManager)</span> </span>&#123;</span><br><span class="line">        mAudioManager = (AudioManager)context.getSystemService(Context.AUDIO_SERVICE);	<span class="comment">// WiredAccessoryManager和AUDIO_SERVICE建立关系，从而状态可以传递给audio</span></span><br><span class="line">        mUseDevInputEventForAudioJack =</span><br><span class="line">                context.getResources().getBoolean(R.bool.config_useDevInputEventForAudioJack);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// uevent和input方式都会调用此函数，主要是将事件给AudioService广播出去</span></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">updateLocked</span><span class="params">(String newName, <span class="keyword">int</span> newState)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">int</span> headsetState = newState &amp; SUPPORTED_HEADSETS;</span><br><span class="line">        Message msg = mHandler.obtainMessage(MSG_NEW_DEVICE_STATE, headsetState,</span><br><span class="line">                mHeadsetState, newName);</span><br><span class="line">        mHandler.sendMessage(msg);	<span class="comment">// handleMessage</span></span><br><span class="line">            setDeviceStateLocked(curHeadset, headsetState, prevHeadsetState, headsetName);</span><br><span class="line">                <span class="keyword">if</span> (headset == BIT_HEADSET) &#123;</span><br><span class="line">                    outDevice = AudioManager.DEVICE_OUT_WIRED_HEADSET;</span><br><span class="line">                    inDevice = AudioManager.DEVICE_IN_WIRED_HEADSET;</span><br><span class="line">                &#125; <span class="keyword">else</span> <span class="keyword">if</span> (headset == BIT_HEADSET_NO_MIC)&#123;</span><br><span class="line">                    outDevice = AudioManager.DEVICE_OUT_WIRED_HEADPHONE;</span><br><span class="line">                &#125; <span class="keyword">else</span> <span class="keyword">if</span> (headset == BIT_LINEOUT)&#123;</span><br><span class="line">                    outDevice = AudioManager.DEVICE_OUT_LINE;</span><br><span class="line">                &#125;</span><br><span class="line">                <span class="keyword">if</span> (outDevice != <span class="number">0</span>) &#123;</span><br><span class="line">                    mAudioManager.setWiredDeviceConnectionState(outDevice, state, headsetName); <span class="comment">// AudioManager</span></span><br><span class="line">                        service.setWiredDeviceConnectionState(device, state, name);				<span class="comment">// AudioService</span></span><br><span class="line">                            queueMsgUnderWakeLock(mAudioHandler,</span><br><span class="line">                                    MSG_SET_WIRED_DEVICE_CONNECTION_STATE,</span><br><span class="line">                                    device,</span><br><span class="line">                                    state,</span><br><span class="line">                                    name,</span><br><span class="line">                                    delay);</span><br><span class="line">                                sendMsg(handler, msg, SENDMSG_QUEUE, arg1, arg2, obj, delay);	<span class="comment">// mAudioHandler.handleMessage</span></span><br><span class="line">                                    <span class="keyword">case</span> MSG_SET_WIRED_DEVICE_CONNECTION_STATE:</span><br><span class="line">                                        onSetWiredDeviceConnectionState(msg.arg1, msg.arg2, (String)msg.obj);</span><br><span class="line">                                            handleDeviceConnection((state == <span class="number">1</span>), device, (isUsb ? name : <span class="string">""</span>));	<span class="comment">// FIXME</span></span><br><span class="line">                                            sendDeviceConnectionIntent(device, state, name);	<span class="comment">// 发送广播</span></span><br><span class="line">                                                <span class="keyword">if</span> (device == AudioSystem.DEVICE_OUT_WIRED_HEADSET) &#123;</span><br><span class="line">                                                    connType = AudioRoutesInfo.MAIN_HEADSET;</span><br><span class="line">                                                    intent.setAction(Intent.ACTION_HEADSET_PLUG);</span><br><span class="line">                                                    intent.putExtra(<span class="string">"microphone"</span>, <span class="number">1</span>);</span><br><span class="line">                                                &#125; <span class="keyword">else</span> <span class="keyword">if</span> (device == AudioSystem.DEVICE_OUT_WIRED_HEADPHONE ||</span><br><span class="line">                                                           device == AudioSystem.DEVICE_OUT_LINE) &#123;</span><br><span class="line">                                                    <span class="comment">/*do apps care about line-out vs headphones?*/</span></span><br><span class="line">                                                    connType = AudioRoutesInfo.MAIN_HEADPHONES;</span><br><span class="line">                                                    intent.setAction(Intent.ACTION_HEADSET_PLUG);</span><br><span class="line">                                                    intent.putExtra(<span class="string">"microphone"</span>, <span class="number">0</span>);</span><br><span class="line">                                                &#125;</span><br><span class="line">                                                ActivityManagerNative.broadcastStickyIntent(intent, <span class="keyword">null</span>, UserHandle.USER_ALL);</span><br><span class="line">                                        <span class="keyword">break</span>;</span><br><span class="line">                &#125;</span><br><span class="line">                <span class="keyword">if</span> (inDevice != <span class="number">0</span>) &#123;</span><br><span class="line">                    mAudioManager.setWiredDeviceConnectionState(inDevice, state, headsetName);</span><br><span class="line">                &#125;</span><br><span class="line"></span><br><span class="line">        mHeadsetState = headsetState;	<span class="comment">// 最后更新</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2019/07/01/Linux/uevent/uevent/" rel="next" title="uevent">
+                <i class="fa fa-chevron-left"></i> uevent
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2019/07/04/Android/audio/input方式上报耳机拔插事件/" rel="prev" title="input方式上报耳机拔插事件">
+                input方式上报耳机拔插事件 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+    </div>
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+
+      <section class="site-overview-wrap sidebar-panel sidebar-panel-active">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="/images/avatar.jpg" alt="zhouzuoyu">
+            
+              <p class="site-author-name" itemprop="name">zhouzuoyu</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">148</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">40</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+            </nav>
+          
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="mailto:hi@zhouzuoyu.com" target="_blank" title="E-Mail">
+                      
+                        <i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </section>
+
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">zhouzuoyu</span>
+
+  
+
+  
+</div>
+
+
+
+
+
+
+
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.0.2"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.0.2"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.0.2"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.0.2"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.0.2"></script>
+
+
+
+  
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+  <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+  <script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+  
+  <script type="text/javascript">
+    var GUEST = ['nick','mail','link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(item=>{
+      return GUEST.indexOf(item)>-1;
+    });
+    new Valine({
+        el: '#comments' ,
+        verify: false,
+        notify: false,
+        appId: 's0qrr1SUElrMtB7IkHDhyquu-gzGzoHsz',
+        appKey: 'rzVUQV27Lo9pBzD6UvCMAzR6',
+        placeholder: 'Just go go',
+        avatar:'mm',
+        guest_info:guest,
+        pageSize:'10' || 10,
+    });
+  </script>
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+<script>
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

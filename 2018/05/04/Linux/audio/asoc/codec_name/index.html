@@ -1,0 +1,872 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=6.0.2" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=6.0.2">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=6.0.2">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=6.0.2">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=6.0.2" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '6.0.2',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  
+  <meta name="keywords" content="Hexo, NexT">
+
+
+<meta name="description" content="该例子是用pdev-&amp;gt;dev-&amp;gt;name和snd_soc_dai_link.codec_name进行match 匹配方式通过machine代码中的snd_soc_dai_link来进行match123456789static struct snd_soc_dai_link s3c24xx_uda134x_dai_link = &amp;#123;    .name = &quot;UDA134X&quot;,">
+<meta property="og:type" content="article">
+<meta property="og:title" content="匹配codec_name">
+<meta property="og:url" content="http://zhouzuoyu.github.io/2018/05/04/Linux/audio/asoc/codec_name/index.html">
+<meta property="og:site_name" content="千里之行始于足下">
+<meta property="og:description" content="该例子是用pdev-&amp;gt;dev-&amp;gt;name和snd_soc_dai_link.codec_name进行match 匹配方式通过machine代码中的snd_soc_dai_link来进行match123456789static struct snd_soc_dai_link s3c24xx_uda134x_dai_link = &amp;#123;    .name = &quot;UDA134X&quot;,">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2019-12-05T06:40:38.307Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="匹配codec_name">
+<meta name="twitter:description" content="该例子是用pdev-&amp;gt;dev-&amp;gt;name和snd_soc_dai_link.codec_name进行match 匹配方式通过machine代码中的snd_soc_dai_link来进行match123456789static struct snd_soc_dai_link s3c24xx_uda134x_dai_link = &amp;#123;    .name = &quot;UDA134X&quot;,">
+
+
+
+
+
+
+  <link rel="canonical" href="http://zhouzuoyu.github.io/2018/05/04/Linux/audio/asoc/codec_name/">
+
+
+  <title>匹配codec_name | 千里之行始于足下</title>
+  
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"> <div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">千里之行始于足下</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-home"></i> <br>首页</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-th"></i> <br>分类</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>归档</a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+  
+
+
+
+ </div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://zhouzuoyu.github.io/2018/05/04/Linux/audio/asoc/codec_name/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="zhouzuoyu">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="千里之行始于足下">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">匹配codec_name</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-05-04T12:00:00+08:00">2018-05-04</time>
+            
+
+            
+            
+
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/Linux/" itemprop="url" rel="index"><span itemprop="name">Linux</span></a></span>
+
+                
+                
+                  ， 
+                
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/Linux/asoc/" itemprop="url" rel="index"><span itemprop="name">asoc</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2018/05/04/Linux/audio/asoc/codec_name/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2018/05/04/Linux/audio/asoc/codec_name/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>该例子是用pdev-&gt;dev-&gt;name和snd_soc_dai_link.codec_name进行match</p>
+<h1 id="匹配方式"><a href="#匹配方式" class="headerlink" title="匹配方式"></a>匹配方式</h1><p>通过machine代码中的snd_soc_dai_link来进行match<br><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">static</span> <span class="class"><span class="keyword">struct</span> <span class="title">snd_soc_dai_link</span> <span class="title">s3c24xx_uda134x_dai_link</span> = &#123;</span></span><br><span class="line">    .name = <span class="string">"UDA134X"</span>,</span><br><span class="line">    .stream_name = <span class="string">"UDA134X"</span>,</span><br><span class="line">    .codec_name = <span class="string">"uda134x-codec"</span>,	<span class="comment">// 指定codec</span></span><br><span class="line">    .codec_dai_name = <span class="string">"uda134x-hifi"</span>,</span><br><span class="line">    .cpu_dai_name = <span class="string">"s3c24xx-iis"</span>,</span><br><span class="line">    .ops = &amp;s3c24xx_uda134x_ops,</span><br><span class="line">    .platform_name	= <span class="string">"samsung-audio"</span>,</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure></p>
+<a id="more"></a>
+<h1 id="设置codec-gt-name"><a href="#设置codec-gt-name" class="headerlink" title="设置codec-&gt;name"></a>设置codec-&gt;name</h1><h2 id="设置pdev-gt-dev的name"><a href="#设置pdev-gt-dev的name" class="headerlink" title="设置pdev-&gt;dev的name"></a>设置pdev-&gt;dev的name</h2><p>注册platform_device时会设置其名字<br><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">static</span> <span class="class"><span class="keyword">struct</span> <span class="title">platform_device</span> <span class="title">uda1340_codec</span> = &#123;</span></span><br><span class="line">    .name = <span class="string">"uda134x-codec"</span>,	<span class="comment">// 这个名字才是用于设置codec_name</span></span><br><span class="line">    .id = <span class="number">-1</span>,</span><br><span class="line">&#125;;</span><br><span class="line"><span class="keyword">static</span> <span class="class"><span class="keyword">struct</span> <span class="title">platform_device</span> *<span class="title">mini2440_devices</span>[] __<span class="title">initdata</span> = &#123;</span></span><br><span class="line">    &amp;uda1340_codec,</span><br><span class="line">&#125;;</span><br><span class="line"><span class="keyword">static</span> <span class="keyword">void</span> __<span class="function">init <span class="title">mini2440_init</span><span class="params">(<span class="keyword">void</span>)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    platform_add_devices(mini2440_devices, ARRAY_SIZE(mini2440_devices));</span><br><span class="line">        ret = platform_device_register(devs[i]);</span><br><span class="line">            <span class="keyword">return</span> platform_device_add(pdev);</span><br><span class="line">                <span class="keyword">if</span> (pdev-&gt;id != <span class="number">-1</span>)</span><br><span class="line">                    dev_set_name(&amp;pdev-&gt;dev, <span class="string">"%s.%d"</span>, pdev-&gt;name,  pdev-&gt;id);	<span class="comment">// platform_device的id != -1，则设置platform_device-&gt;dev的name为[pdev-&gt;name.pdev-&gt;id]</span></span><br><span class="line">                <span class="keyword">else</span></span><br><span class="line">                    dev_set_name(&amp;pdev-&gt;dev, <span class="string">"%s"</span>, pdev-&gt;name);					<span class="comment">// platform_device的id == -1，则设置platform_device-&gt;dev的name为[pdev-&gt;name]</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h2 id="probe时会传入pdev-gt-dev（其中包含name）"><a href="#probe时会传入pdev-gt-dev（其中包含name）" class="headerlink" title="probe时会传入pdev-&gt;dev（其中包含name）"></a>probe时会传入pdev-&gt;dev（其中包含name）</h2><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">static</span> <span class="class"><span class="keyword">struct</span> <span class="title">platform_driver</span> <span class="title">uda134x_codec_driver</span> = &#123;</span></span><br><span class="line">    .driver = &#123;</span><br><span class="line">        .name = <span class="string">"uda134x-codec"</span>,	<span class="comment">// 这个名字主要是为了进入probe</span></span><br><span class="line">        .owner = THIS_MODULE,</span><br><span class="line">    &#125;,</span><br><span class="line">    .probe = uda134x_codec_probe,</span><br><span class="line">    .remove = __devexit_p(uda134x_codec_remove),</span><br><span class="line">&#125;;</span><br><span class="line"><span class="keyword">static</span> <span class="keyword">int</span> __<span class="function">devinit <span class="title">uda134x_codec_probe</span><span class="params">(struct platform_device *pdev)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">return</span> snd_soc_register_codec(&amp;pdev-&gt;dev,</span><br><span class="line">            &amp;soc_codec_dev_uda134x, &amp;uda134x_dai, <span class="number">1</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="pdev-gt-dev-gt-name设置到codec-gt-name"><a href="#pdev-gt-dev-gt-name设置到codec-gt-name" class="headerlink" title="pdev-&gt;dev-&gt;name设置到codec-&gt;name"></a>pdev-&gt;dev-&gt;name设置到codec-&gt;name</h2><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">snd_soc_register_codec</span><span class="params">(struct device *dev,</span></span></span><br><span class="line"><span class="function"><span class="params">			   <span class="keyword">const</span> struct snd_soc_codec_driver *codec_drv,</span></span></span><br><span class="line"><span class="function"><span class="params">			   struct snd_soc_dai_driver *dai_drv,</span></span></span><br><span class="line"><span class="function"><span class="params">			   <span class="keyword">int</span> num_dai)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    codec-&gt;name = fmt_single_name(dev, &amp;codec-&gt;id);</span><br><span class="line">        strlcpy(name, dev_name(dev), NAME_SIZE);	<span class="comment">// 参考dev_set_name</span></span><br><span class="line">        <span class="comment">// 该例子中name为uda134x-codec，dev-&gt;driver-&gt;name也为uda134x-codec，所以found为true，但是没有id，所以并没有什么用</span></span><br><span class="line">        found = <span class="built_in">strstr</span>(name, dev-&gt;driver-&gt;name);</span><br><span class="line">        <span class="keyword">if</span> (found) &#123;</span><br><span class="line">            <span class="comment">/* get ID */</span></span><br><span class="line">            <span class="keyword">if</span> (<span class="built_in">sscanf</span>(&amp;found[<span class="built_in">strlen</span>(dev-&gt;driver-&gt;name)], <span class="string">".%d"</span>, id) == <span class="number">1</span>) &#123;</span><br><span class="line"></span><br><span class="line">                <span class="comment">/* discard ID from name if ID == -1 */</span></span><br><span class="line">                <span class="keyword">if</span> (*id == <span class="number">-1</span>)</span><br><span class="line">                    found[<span class="built_in">strlen</span>(dev-&gt;driver-&gt;name)] = <span class="string">'\0'</span>;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> kstrdup(name, GFP_KERNEL);	<span class="comment">// pdev-&gt;dev-&gt;name</span></span><br><span class="line">        </span><br><span class="line">    list_add(&amp;codec-&gt;<span class="built_in">list</span>, &amp;codec_list);			<span class="comment">// 添加到codec_list链表</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h1 id="codec-gt-name匹配过程"><a href="#codec-gt-name匹配过程" class="headerlink" title="codec-&gt;name匹配过程"></a>codec-&gt;name匹配过程</h1><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">int</span> <span class="title">soc_bind_dai_link</span><span class="params">(struct snd_soc_card *card, <span class="keyword">int</span> num)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    list_for_each_entry(codec, &amp;codec_list, <span class="built_in">list</span>) &#123;	<span class="comment">// 从codec_list中取出node</span></span><br><span class="line">        <span class="keyword">if</span> (!<span class="built_in">strcmp</span>(codec-&gt;name, dai_link-&gt;codec_name)) &#123;	<span class="comment">// 对比name</span></span><br><span class="line">            rtd-&gt;codec = codec;</span><br><span class="line"></span><br><span class="line">            <span class="comment">/* CODEC found, so find CODEC DAI from registered DAIs from this CODEC*/</span></span><br><span class="line">            list_for_each_entry(codec_dai, &amp;dai_list, <span class="built_in">list</span>) &#123;</span><br><span class="line">                <span class="keyword">if</span> (codec-&gt;dev == codec_dai-&gt;dev &amp;&amp;</span><br><span class="line">                        !<span class="built_in">strcmp</span>(codec_dai-&gt;name, dai_link-&gt;codec_dai_name)) &#123;</span><br><span class="line">                    rtd-&gt;codec_dai = codec_dai;</span><br><span class="line">                    <span class="keyword">goto</span> find_platform;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            <span class="keyword">goto</span> find_platform;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h1 id="snd-soc-register-codec"><a href="#snd-soc-register-codec" class="headerlink" title="snd_soc_register_codec"></a>snd_soc_register_codec</h1><p>以上就是codec-&gt;name的匹配过程，现在再看一下snd_soc_register_codec<br><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">snd_soc_register_codec</span><span class="params">(struct device *dev,</span></span></span><br><span class="line"><span class="function"><span class="params">			   <span class="keyword">const</span> struct snd_soc_codec_driver *codec_drv,</span></span></span><br><span class="line"><span class="function"><span class="params">			   struct snd_soc_dai_driver *dai_drv,</span></span></span><br><span class="line"><span class="function"><span class="params">			   <span class="keyword">int</span> num_dai)</span></span></span><br></pre></td></tr></table></figure></p>
+<p>第一个参数会用来设置codec-&gt;name，第二参数传入snd_soc_codec_driver(dapm等信息)，第三个参数传入snd_soc_dai_driver</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/03/26/c/线程安全/" rel="next" title="线程安全">
+                <i class="fa fa-chevron-left"></i> 线程安全
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/05/09/Env/android studio/安装android studio/" rel="prev" title="安装android studio过程">
+                安装android studio过程 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+    </div>
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="/images/avatar.jpg" alt="zhouzuoyu">
+            
+              <p class="site-author-name" itemprop="name">zhouzuoyu</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">148</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">40</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+            </nav>
+          
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="mailto:hi@zhouzuoyu.com" target="_blank" title="E-Mail">
+                      
+                        <i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#匹配方式"><span class="nav-number">1.</span> <span class="nav-text">匹配方式</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#设置codec-gt-name"><span class="nav-number">2.</span> <span class="nav-text">设置codec-&gt;name</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#设置pdev-gt-dev的name"><span class="nav-number">2.1.</span> <span class="nav-text">设置pdev-&gt;dev的name</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#probe时会传入pdev-gt-dev（其中包含name）"><span class="nav-number">2.2.</span> <span class="nav-text">probe时会传入pdev-&gt;dev（其中包含name）</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#pdev-gt-dev-gt-name设置到codec-gt-name"><span class="nav-number">2.3.</span> <span class="nav-text">pdev-&gt;dev-&gt;name设置到codec-&gt;name</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#codec-gt-name匹配过程"><span class="nav-number">3.</span> <span class="nav-text">codec-&gt;name匹配过程</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#snd-soc-register-codec"><span class="nav-number">4.</span> <span class="nav-text">snd_soc_register_codec</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">zhouzuoyu</span>
+
+  
+
+  
+</div>
+
+
+
+
+
+
+
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.0.2"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.0.2"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.0.2"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.0.2"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.0.2"></script>
+
+
+
+  
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+  <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+  <script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+  
+  <script type="text/javascript">
+    var GUEST = ['nick','mail','link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(item=>{
+      return GUEST.indexOf(item)>-1;
+    });
+    new Valine({
+        el: '#comments' ,
+        verify: false,
+        notify: false,
+        appId: 's0qrr1SUElrMtB7IkHDhyquu-gzGzoHsz',
+        appKey: 'rzVUQV27Lo9pBzD6UvCMAzR6',
+        placeholder: 'Just go go',
+        avatar:'mm',
+        guest_info:guest,
+        pageSize:'10' || 10,
+    });
+  </script>
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+<script>
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

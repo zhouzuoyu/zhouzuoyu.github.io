@@ -1,0 +1,448 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url>
+    <loc>http://zhouzuoyu.github.io/2020/07/13/Linux/audio/asoc/dapm/dai_stream_widget/</loc>
+    <lastmod>2020-07-13</lastmod>
+  </url>  <url>
+    <loc>http://zhouzuoyu.github.io/2018/03/20/Linux/audio/asoc/dapm/widget_route/</loc>
+    <lastmod>2020-07-13</lastmod>
+  </url>  <url>
+    <loc>http://zhouzuoyu.github.io/2018/03/22/Linux/audio/asoc/dapm/dapm_power_widgets/</loc>
+    <lastmod>2020-07-13</lastmod>
+  </url>  <url>
+    <loc>http://zhouzuoyu.github.io/2018/03/22/Linux/audio/asoc/dapm/complete-path/</loc>
+    <lastmod>2020-07-13</lastmod>
+  </url>  <url>
+    <loc>http://zhouzuoyu.github.io/2020/07/12/Linux/audio/asoc/dapm/tinymix%E6%B5%81%E7%A8%8B/</loc>
+    <lastmod>2020-07-13</lastmod>
+  </url>  <url>
+    <loc>http://zhouzuoyu.github.io/2020/07/12/Linux/audio/asoc/dapm/qualcomm_dapm/</loc>
+    <lastmod>2020-07-13</lastmod>
+  </url>  <url>
+    <loc>http://zhouzuoyu.github.io/2018/06/05/Linux/audio/asoc/dapm/complete-path%E4%BE%8B%E5%AD%90/</loc>
+    <lastmod>2020-07-13</lastmod>
+  </url>  <url>
+    <loc>http://zhouzuoyu.github.io/2019/12/09/Android/audio/AudioFlinger_startup_seq/</loc>
+    <lastmod>2020-07-10</lastmod>
+  </url>  <url>
+    <loc>http://zhouzuoyu.github.io/2019/12/09/Android/audio/audioTrack/</loc>
+    <lastmod>2020-07-10</lastmod>
+  </url>  <url>
+    <loc>http://zhouzuoyu.github.io/2019/12/04/Android/audio/audioTrack%E9%80%89%E6%8B%A9output/</loc>
+    <lastmod>2020-07-10</lastmod>
+  </url>  <url>
+    <loc>http://zhouzuoyu.github.io/2019/12/09/Android/audio/audio%20HAL/</loc>
+    <lastmod>2020-07-10</lastmod>
+  </url>  <url>
+    <loc>http://zhouzuoyu.github.io/2019/12/06/Android/audio/audioFlinger_load_hal/</loc>
+    <lastmod>2020-07-10</lastmod>
+  </url>  <url>
+    <loc>http://zhouzuoyu.github.io/2019/12/10/Android/audio/audioPolicyManager/</loc>
+    <lastmod>2020-07-10</lastmod>
+  </url>  <url>
+    <loc>http://zhouzuoyu.github.io/2019/12/09/Android/audio/audio_policy/</loc>
+    <lastmod>2020-07-10</lastmod>
+  </url>  <url>
+    <loc>http://zhouzuoyu.github.io/2019/12/09/Android/audio/availableOutputDeviceTypes/</loc>
+    <lastmod>2020-07-10</lastmod>
+  </url>  <url>
+    <loc>http://zhouzuoyu.github.io/2019/12/09/Android/audio/mHwModules/</loc>
+    <lastmod>2020-07-10</lastmod>
+  </url>  <url>
+    <loc>http://zhouzuoyu.github.io/2019/12/09/Android/audio/mOutputProfiles/</loc>
+    <lastmod>2020-07-10</lastmod>
+  </url>  <url>
+    <loc>http://zhouzuoyu.github.io/2019/12/09/Android/audio/mOutputs/</loc>
+    <lastmod>2020-07-10</lastmod>
+  </url>  <url>
+    <loc>http://zhouzuoyu.github.io/2019/12/09/Android/audio/shared_mem_test/</loc>
+    <lastmod>2020-07-10</lastmod>
+  </url>  <url>
+    <loc>http://zhouzuoyu.github.io/2018/03/06/c/endian/</loc>
+    <lastmod>2019-12-05</lastmod>
+  </url>  <url>
+    <loc>http://zhouzuoyu.github.io/2018/02/08/c/list/</loc>
+    <lastmod>2019-12-05</lastmod>
+  </url>  <url>
+    <loc>http://zhouzuoyu.github.io/2018/03/06/c/extern-c/</loc>
+    <lastmod>2019-12-05</lastmod>
+  </url>  <url>
+    <loc>http://zhouzuoyu.github.io/2018/02/08/c/mem/</loc>
+    <lastmod>2019-12-05</lastmod>
+  </url>  <url>
+    <loc>http://zhouzuoyu.github.io/2018/02/08/c/sort/</loc>
+    <lastmod>2019-12-05</lastmod>
+  </url>  <url>
+    <loc>http://zhouzuoyu.github.io/2018/02/08/c/str/</loc>
+    <lastmod>2019-12-05</lastmod>
+  </url>  <url>
+    <loc>http://zhouzuoyu.github.io/2018/03/26/c/%E5%8F%98%E9%87%8F%E5%88%86%E9%85%8D/</loc>
+    <lastmod>2019-12-05</lastmod>
+  </url>  <url>
+    <loc>http://zhouzuoyu.github.io/2018/03/26/c/%E7%BA%BF%E7%A8%8B%E5%AE%89%E5%85%A8/</loc>
+    <lastmod>2019-12-05</lastmod>
+  </url>  <url>
+    <loc>http://zhouzuoyu.github.io/2018/05/09/c/%E8%8E%B7%E5%8F%96%E5%BD%93%E5%89%8D%E6%97%B6%E9%97%B4/</loc>
+    <lastmod>2019-12-05</lastmod>
+  </url>  <url>
+    <loc>http://zhouzuoyu.github.io/2019/05/09/common%20sense/%E8%BF%9B%E5%88%B6%E8%BD%AC%E6%8D%A2/</loc>
+    <lastmod>2019-12-05</lastmod>
+  </url>  <url>
+    <loc>http://zhouzuoyu.github.io/2019/06/06/fsl/ldb/</loc>
+    <lastmod>2019-12-05</lastmod>
+  </url>  <url>
+    <loc>http://zhouzuoyu.github.io/2018/06/07/git/git%E5%B8%B8%E7%94%A8%E5%91%BD%E4%BB%A4/</loc>
+    <lastmod>2019-12-05</lastmod>
+  </url>  <url>
+    <loc>http://zhouzuoyu.github.io/2018/03/23/makefile/%E5%8D%95%E6%96%87%E4%BB%B6%E5%A4%B9makefile/</loc>
+    <lastmod>2019-12-05</lastmod>
+  </url>  <url>
+    <loc>http://zhouzuoyu.github.io/2018/06/06/interface/csi/</loc>
+    <lastmod>2019-12-05</lastmod>
+  </url>  <url>
+    <loc>http://zhouzuoyu.github.io/2019/06/06/uboot/bootdelay/</loc>
+    <lastmod>2019-12-05</lastmod>
+  </url>  <url>
+    <loc>http://zhouzuoyu.github.io/2019/06/06/uboot/init_sequence_/</loc>
+    <lastmod>2019-12-05</lastmod>
+  </url>  <url>
+    <loc>http://zhouzuoyu.github.io/2019/07/01/Linux/uevent/uevent/</loc>
+    <lastmod>2019-12-05</lastmod>
+  </url>  <url>
+    <loc>http://zhouzuoyu.github.io/2018/11/14/Linux/usb/module_usb_driver/</loc>
+    <lastmod>2019-12-05</lastmod>
+  </url>  <url>
+    <loc>http://zhouzuoyu.github.io/2019/07/01/Linux/uevent/uevent_helper/</loc>
+    <lastmod>2019-12-05</lastmod>
+  </url>  <url>
+    <loc>http://zhouzuoyu.github.io/2019/04/23/Linux/v4l2/vidioc_int_g_fmt_cap/</loc>
+    <lastmod>2019-12-05</lastmod>
+  </url>  <url>
+    <loc>http://zhouzuoyu.github.io/2018/11/15/Linux/usb/u%E7%9B%98probe%E8%BF%87%E7%A8%8B/</loc>
+    <lastmod>2019-12-05</lastmod>
+  </url>  <url>
+    <loc>http://zhouzuoyu.github.io/2019/04/17/soc/imx6/modify%20initramfs/</loc>
+    <lastmod>2019-12-05</lastmod>
+  </url>  <url>
+    <loc>http://zhouzuoyu.github.io/2019/06/12/Android/UEventObserver/</loc>
+    <lastmod>2019-12-05</lastmod>
+  </url>  <url>
+    <loc>http://zhouzuoyu.github.io/2018/05/17/Android/fastboot%E7%83%A7%E5%86%99img/</loc>
+    <lastmod>2019-12-05</lastmod>
+  </url>  <url>
+    <loc>http://zhouzuoyu.github.io/2018/02/08/Android/%E7%A1%AC%E4%BB%B6%E8%AE%BF%E9%97%AE%E6%9C%8D%E5%8A%A1/</loc>
+    <lastmod>2019-12-05</lastmod>
+  </url>  <url>
+    <loc>http://zhouzuoyu.github.io/2019/05/28/Env/beyondcompare/</loc>
+    <lastmod>2019-12-05</lastmod>
+  </url>  <url>
+    <loc>http://zhouzuoyu.github.io/2018/02/07/Env/hexo%E4%BD%BF%E7%94%A8%E6%8A%80%E5%B7%A7/</loc>
+    <lastmod>2019-12-05</lastmod>
+  </url>  <url>
+    <loc>http://zhouzuoyu.github.io/2018/08/09/Env/hexo%E5%AE%89%E8%A3%85%E6%8A%A5%E9%94%99/</loc>
+    <lastmod>2019-12-05</lastmod>
+  </url>  <url>
+    <loc>http://zhouzuoyu.github.io/2018/02/07/Env/%E7%A7%91%E5%AD%A6%E4%B8%8A%E7%BD%91/</loc>
+    <lastmod>2019-12-05</lastmod>
+  </url>  <url>
+    <loc>http://zhouzuoyu.github.io/2018/01/29/Android/Sensors/HAL/</loc>
+    <lastmod>2019-12-05</lastmod>
+  </url>  <url>
+    <loc>http://zhouzuoyu.github.io/2018/02/09/Android/Sensors/HAL%E6%B5%8B%E8%AF%95%E7%A8%8B%E5%BA%8F/</loc>
+    <lastmod>2019-12-05</lastmod>
+  </url>  <url>
+    <loc>http://zhouzuoyu.github.io/2018/01/29/Android/Sensors/SensorService/</loc>
+    <lastmod>2019-12-05</lastmod>
+  </url>  <url>
+    <loc>http://zhouzuoyu.github.io/2018/01/29/Android/Sensors/SensorService%E5%90%AF%E5%8A%A8/</loc>
+    <lastmod>2019-12-05</lastmod>
+  </url>  <url>
+    <loc>http://zhouzuoyu.github.io/2019/07/04/Android/audio/input%E6%96%B9%E5%BC%8F%E4%B8%8A%E6%8A%A5%E8%80%B3%E6%9C%BA%E6%8B%94%E6%8F%92%E4%BA%8B%E4%BB%B6/</loc>
+    <lastmod>2019-12-05</lastmod>
+  </url>  <url>
+    <loc>http://zhouzuoyu.github.io/2019/07/04/Android/audio/uevent%E6%96%B9%E5%BC%8F%E4%B8%8A%E6%8A%A5%E8%80%B3%E6%9C%BA%E6%8B%94%E6%8F%92%E4%BA%8B%E4%BB%B6/</loc>
+    <lastmod>2019-12-05</lastmod>
+  </url>  <url>
+    <loc>http://zhouzuoyu.github.io/2018/02/08/Android/tinyalsa/tinymix/</loc>
+    <lastmod>2019-12-05</lastmod>
+  </url>  <url>
+    <loc>http://zhouzuoyu.github.io/2018/02/08/Android/tinyalsa/tinyplay/</loc>
+    <lastmod>2019-12-05</lastmod>
+  </url>  <url>
+    <loc>http://zhouzuoyu.github.io/2018/05/17/Android/partition/android%E5%88%86%E5%8C%BA/</loc>
+    <lastmod>2019-12-05</lastmod>
+  </url>  <url>
+    <loc>http://zhouzuoyu.github.io/2018/05/09/Env/android%20studio/%E5%AE%89%E8%A3%85android%20studio/</loc>
+    <lastmod>2019-12-05</lastmod>
+  </url>  <url>
+    <loc>http://zhouzuoyu.github.io/2018/06/01/Env/ubuntu/%E5%85%B1%E4%BA%AB/</loc>
+    <lastmod>2019-12-05</lastmod>
+  </url>  <url>
+    <loc>http://zhouzuoyu.github.io/2018/05/31/Env/ubuntu/%E6%A0%BC%E5%BC%8F%E5%8C%96u%E7%9B%98/</loc>
+    <lastmod>2019-12-05</lastmod>
+  </url>  <url>
+    <loc>http://zhouzuoyu.github.io/2018/11/12/Env/ubuntu/%E9%85%8D%E7%BD%AE/</loc>
+    <lastmod>2019-12-05</lastmod>
+  </url>  <url>
+    <loc>http://zhouzuoyu.github.io/2019/07/22/Linux/audio/%E5%9F%BA%E6%9C%AC%E6%A6%82%E5%BF%B5/</loc>
+    <lastmod>2019-12-05</lastmod>
+  </url>  <url>
+    <loc>http://zhouzuoyu.github.io/2019/06/24/Linux/app/uart/</loc>
+    <lastmod>2019-12-05</lastmod>
+  </url>  <url>
+    <loc>http://zhouzuoyu.github.io/2019/06/24/Linux/app/pthread/</loc>
+    <lastmod>2019-12-05</lastmod>
+  </url>  <url>
+    <loc>http://zhouzuoyu.github.io/2018/02/05/Linux/flash/bbt/</loc>
+    <lastmod>2019-12-05</lastmod>
+  </url>  <url>
+    <loc>http://zhouzuoyu.github.io/2018/02/05/Linux/flash/nand_base%20API/</loc>
+    <lastmod>2019-12-05</lastmod>
+  </url>  <url>
+    <loc>http://zhouzuoyu.github.io/2018/02/05/Linux/flash/nand_device/</loc>
+    <lastmod>2019-12-05</lastmod>
+  </url>  <url>
+    <loc>http://zhouzuoyu.github.io/2018/02/05/Linux/flash/nand_controller/</loc>
+    <lastmod>2019-12-05</lastmod>
+  </url>  <url>
+    <loc>http://zhouzuoyu.github.io/2018/05/16/Linux/flash/nor_flash%E9%94%99%E4%BD%8D%E8%BF%9E%E6%8E%A5/</loc>
+    <lastmod>2019-12-05</lastmod>
+  </url>  <url>
+    <loc>http://zhouzuoyu.github.io/2018/05/16/Linux/flash/nor_nand%E5%8C%BA%E5%88%AB/</loc>
+    <lastmod>2019-12-05</lastmod>
+  </url>  <url>
+    <loc>http://zhouzuoyu.github.io/2018/02/05/Linux/flash/overview/</loc>
+    <lastmod>2019-12-05</lastmod>
+  </url>  <url>
+    <loc>http://zhouzuoyu.github.io/2018/05/24/Linux/compile/save_config/</loc>
+    <lastmod>2019-12-05</lastmod>
+  </url>  <url>
+    <loc>http://zhouzuoyu.github.io/2018/02/07/Linux/chrdev/%E5%88%9B%E5%BB%BA%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87/</loc>
+    <lastmod>2019-12-05</lastmod>
+  </url>  <url>
+    <loc>http://zhouzuoyu.github.io/2018/02/07/Linux/cpufreq/dbs_governor/</loc>
+    <lastmod>2019-12-05</lastmod>
+  </url>  <url>
+    <loc>http://zhouzuoyu.github.io/2018/02/07/Linux/chrdev/Misc/</loc>
+    <lastmod>2019-12-05</lastmod>
+  </url>  <url>
+    <loc>http://zhouzuoyu.github.io/2018/02/07/Linux/cpufreq/cpufreq_driver/</loc>
+    <lastmod>2019-12-05</lastmod>
+  </url>  <url>
+    <loc>http://zhouzuoyu.github.io/2018/02/07/Linux/cpufreq/cpufreq_governor%E6%A1%86%E6%9E%B6/</loc>
+    <lastmod>2019-12-05</lastmod>
+  </url>  <url>
+    <loc>http://zhouzuoyu.github.io/2018/02/07/Linux/cpufreq/ondemand/</loc>
+    <lastmod>2019-12-05</lastmod>
+  </url>  <url>
+    <loc>http://zhouzuoyu.github.io/2018/02/07/Linux/cpufreq/overview/</loc>
+    <lastmod>2019-12-05</lastmod>
+  </url>  <url>
+    <loc>http://zhouzuoyu.github.io/2018/02/07/Linux/cpufreq/interactive/</loc>
+    <lastmod>2019-12-05</lastmod>
+  </url>  <url>
+    <loc>http://zhouzuoyu.github.io/2018/02/07/Linux/cpufreq/performance/</loc>
+    <lastmod>2019-12-05</lastmod>
+  </url>  <url>
+    <loc>http://zhouzuoyu.github.io/2018/11/12/Linux/i2c/app/</loc>
+    <lastmod>2019-12-05</lastmod>
+  </url>  <url>
+    <loc>http://zhouzuoyu.github.io/2018/11/12/Linux/i2c/at24/</loc>
+    <lastmod>2019-12-05</lastmod>
+  </url>  <url>
+    <loc>http://zhouzuoyu.github.io/2018/02/06/Linux/i2c/i2c_adapter/</loc>
+    <lastmod>2019-12-05</lastmod>
+  </url>  <url>
+    <loc>http://zhouzuoyu.github.io/2018/02/06/Linux/i2c/i2c_algorithm/</loc>
+    <lastmod>2019-12-05</lastmod>
+  </url>  <url>
+    <loc>http://zhouzuoyu.github.io/2018/02/06/Linux/i2c/i2c_bus_type/</loc>
+    <lastmod>2019-12-05</lastmod>
+  </url>  <url>
+    <loc>http://zhouzuoyu.github.io/2018/02/06/Linux/i2c/i2c_client/</loc>
+    <lastmod>2019-12-05</lastmod>
+  </url>  <url>
+    <loc>http://zhouzuoyu.github.io/2018/02/06/Linux/i2c/i2c_driver/</loc>
+    <lastmod>2019-12-05</lastmod>
+  </url>  <url>
+    <loc>http://zhouzuoyu.github.io/2018/02/06/Linux/i2c/i2c_overview/</loc>
+    <lastmod>2019-12-05</lastmod>
+  </url>  <url>
+    <loc>http://zhouzuoyu.github.io/2018/01/30/Linux/input/Input_dev/</loc>
+    <lastmod>2019-12-05</lastmod>
+  </url>  <url>
+    <loc>http://zhouzuoyu.github.io/2018/01/30/Linux/input/Input_dev%E5%92%8CInput_handler%E9%93%BE%E6%8E%A5/</loc>
+    <lastmod>2019-12-05</lastmod>
+  </url>  <url>
+    <loc>http://zhouzuoyu.github.io/2019/04/23/Linux/i2c/i2c_recovery/</loc>
+    <lastmod>2019-12-05</lastmod>
+  </url>  <url>
+    <loc>http://zhouzuoyu.github.io/2018/01/30/Linux/input/Input_handler/</loc>
+    <lastmod>2019-12-05</lastmod>
+  </url>  <url>
+    <loc>http://zhouzuoyu.github.io/2018/01/30/Linux/input/Input%E5%AD%90%E7%B3%BB%E7%BB%9FOverview/</loc>
+    <lastmod>2019-12-05</lastmod>
+  </url>  <url>
+    <loc>http://zhouzuoyu.github.io/2018/02/04/Linux/nvmem/nvmem%20device/</loc>
+    <lastmod>2019-12-05</lastmod>
+  </url>  <url>
+    <loc>http://zhouzuoyu.github.io/2018/05/14/Linux/interrupt/%E4%B8%AD%E6%96%AD%E7%9D%A1%E7%9C%A0/</loc>
+    <lastmod>2019-12-05</lastmod>
+  </url>  <url>
+    <loc>http://zhouzuoyu.github.io/2018/05/16/Linux/input/tiny4412_tp/</loc>
+    <lastmod>2019-12-05</lastmod>
+  </url>  <url>
+    <loc>http://zhouzuoyu.github.io/2018/02/04/Linux/nvmem/nvmem%20framework/</loc>
+    <lastmod>2019-12-05</lastmod>
+  </url>  <url>
+    <loc>http://zhouzuoyu.github.io/2018/02/26/Linux/kernel/kthread/</loc>
+    <lastmod>2019-12-05</lastmod>
+  </url>  <url>
+    <loc>http://zhouzuoyu.github.io/2018/11/12/Linux/spi/spi/</loc>
+    <lastmod>2019-12-05</lastmod>
+  </url>  <url>
+    <loc>http://zhouzuoyu.github.io/2018/02/03/Linux/power/autosleep/</loc>
+    <lastmod>2019-12-05</lastmod>
+  </url>  <url>
+    <loc>http://zhouzuoyu.github.io/2018/02/03/Linux/power/overview/</loc>
+    <lastmod>2019-12-05</lastmod>
+  </url>  <url>
+    <loc>http://zhouzuoyu.github.io/2018/02/03/Linux/power/runtime/</loc>
+    <lastmod>2019-12-05</lastmod>
+  </url>  <url>
+    <loc>http://zhouzuoyu.github.io/2019/05/13/Linux/timer/timer/</loc>
+    <lastmod>2019-12-05</lastmod>
+  </url>  <url>
+    <loc>http://zhouzuoyu.github.io/2018/03/07/Linux/power/suspend%E9%A1%BA%E5%BA%8F/</loc>
+    <lastmod>2019-12-05</lastmod>
+  </url>  <url>
+    <loc>http://zhouzuoyu.github.io/2018/02/03/Linux/power/suspend%E6%B5%81%E7%A8%8B/</loc>
+    <lastmod>2019-12-05</lastmod>
+  </url>  <url>
+    <loc>http://zhouzuoyu.github.io/2018/02/03/Linux/power/wakeup_count/</loc>
+    <lastmod>2019-12-05</lastmod>
+  </url>  <url>
+    <loc>http://zhouzuoyu.github.io/2018/02/03/Linux/power/wakeup_event/</loc>
+    <lastmod>2019-12-05</lastmod>
+  </url>  <url>
+    <loc>http://zhouzuoyu.github.io/2018/02/03/Linux/power/%E5%90%AF%E5%8A%A8suspend/</loc>
+    <lastmod>2019-12-05</lastmod>
+  </url>  <url>
+    <loc>http://zhouzuoyu.github.io/2018/02/03/Linux/power/wakelock/</loc>
+    <lastmod>2019-12-05</lastmod>
+  </url>  <url>
+    <loc>http://zhouzuoyu.github.io/2018/11/19/Linux/audio/asoc/SNDRV_PCM_IOCTL_HW_PARAMS/</loc>
+    <lastmod>2019-12-05</lastmod>
+  </url>  <url>
+    <loc>http://zhouzuoyu.github.io/2019/04/23/Linux/audio/alsa-lib/dump%20data/</loc>
+    <lastmod>2019-12-05</lastmod>
+  </url>  <url>
+    <loc>http://zhouzuoyu.github.io/2018/05/04/Linux/audio/asoc/codec_name/</loc>
+    <lastmod>2019-12-05</lastmod>
+  </url>  <url>
+    <loc>http://zhouzuoyu.github.io/2019/07/16/Linux/audio/asoc/imx-pcm-fiq/</loc>
+    <lastmod>2019-12-05</lastmod>
+  </url>  <url>
+    <loc>http://zhouzuoyu.github.io/2018/02/08/Linux/audio/asoc/kcontrol_fops/</loc>
+    <lastmod>2019-12-05</lastmod>
+  </url>  <url>
+    <loc>http://zhouzuoyu.github.io/2018/02/08/Linux/audio/asoc/kcontrol%E6%B5%81%E7%A8%8B/</loc>
+    <lastmod>2019-12-05</lastmod>
+  </url>  <url>
+    <loc>http://zhouzuoyu.github.io/2018/02/08/Linux/audio/asoc/snd_soc_write/</loc>
+    <lastmod>2019-12-05</lastmod>
+  </url>  <url>
+    <loc>http://zhouzuoyu.github.io/2018/02/08/Linux/audio/asoc/soc-audio%E6%B3%A8%E5%86%8C/</loc>
+    <lastmod>2019-12-05</lastmod>
+  </url>  <url>
+    <loc>http://zhouzuoyu.github.io/2018/05/10/Linux/audio/asoc/%E5%88%9B%E5%BB%BApcm%E8%AE%BE%E5%A4%87/</loc>
+    <lastmod>2019-12-05</lastmod>
+  </url>  <url>
+    <loc>http://zhouzuoyu.github.io/2018/02/08/Linux/audio/asoc/%E6%B7%BB%E5%8A%A0kcontrol/</loc>
+    <lastmod>2019-12-05</lastmod>
+  </url>  <url>
+    <loc>http://zhouzuoyu.github.io/2018/06/07/Linux/bus-device-driver/platform/dev_name/</loc>
+    <lastmod>2019-12-05</lastmod>
+  </url>  <url>
+    <loc>http://zhouzuoyu.github.io/2018/06/07/Linux/bus-device-driver/platform/match/</loc>
+    <lastmod>2019-12-05</lastmod>
+  </url>  <url>
+    <loc>http://zhouzuoyu.github.io/2018/06/08/Linux/bus-device-driver/platform/probe/</loc>
+    <lastmod>2019-12-05</lastmod>
+  </url>  <url>
+    <loc>http://zhouzuoyu.github.io/2018/06/07/Linux/bus-device-driver/platform/register_device/</loc>
+    <lastmod>2019-12-05</lastmod>
+  </url>  <url>
+    <loc>http://zhouzuoyu.github.io/2018/05/21/Linux/intel/crl/match/</loc>
+    <lastmod>2019-12-05</lastmod>
+  </url>  <url>
+    <loc>http://zhouzuoyu.github.io/2018/05/21/Linux/intel/crl/old_match_method/</loc>
+    <lastmod>2019-12-05</lastmod>
+  </url>  <url>
+    <loc>http://zhouzuoyu.github.io/2018/06/01/Linux/intel/crl/pdata%E5%92%8Cisys%E7%9A%84%E8%81%94%E7%B3%BB%E4%BA%8C/</loc>
+    <lastmod>2019-12-05</lastmod>
+  </url>  <url>
+    <loc>http://zhouzuoyu.github.io/2018/06/01/Linux/intel/crl/pdata%E5%92%8Cisys%E7%9A%84%E8%81%94%E7%B3%BB%E4%B8%80/</loc>
+    <lastmod>2019-12-05</lastmod>
+  </url>  <url>
+    <loc>http://zhouzuoyu.github.io/2018/06/04/Linux/intel/crl/pdata%E6%B3%A8%E5%86%8Ci2c_client/</loc>
+    <lastmod>2019-12-05</lastmod>
+  </url>  <url>
+    <loc>http://zhouzuoyu.github.io/2018/06/04/Linux/intel/crl/power/</loc>
+    <lastmod>2019-12-05</lastmod>
+  </url>  <url>
+    <loc>http://zhouzuoyu.github.io/2018/03/22/Linux/audio/asoc/dapm/overview/</loc>
+    <lastmod>2019-12-05</lastmod>
+  </url>  <url>
+    <loc>http://zhouzuoyu.github.io/2018/03/23/Linux/audio/asoc/dapm/%E4%B8%A4%E7%B1%BBkcontrol%E7%9A%84%E5%8C%BA%E5%88%AB/</loc>
+    <lastmod>2019-12-05</lastmod>
+  </url>  <url>
+    <loc>http://zhouzuoyu.github.io/2018/03/22/Linux/audio/asoc/dapm/%E6%B3%A8%E5%86%8Cwidget%E4%B8%AD%E7%9A%84kcontrol/</loc>
+    <lastmod>2019-12-05</lastmod>
+  </url>  <url>
+    <loc>http://zhouzuoyu.github.io/2018/02/11/Android/InputFlinger/EventHub/</loc>
+    <lastmod>2019-12-05</lastmod>
+  </url>  <url>
+    <loc>http://zhouzuoyu.github.io/2018/02/11/Android/InputFlinger/GlobalKey/</loc>
+    <lastmod>2019-12-05</lastmod>
+  </url>  <url>
+    <loc>http://zhouzuoyu.github.io/2018/02/11/Android/InputFlinger/InputDispatcher/</loc>
+    <lastmod>2019-12-05</lastmod>
+  </url>  <url>
+    <loc>http://zhouzuoyu.github.io/2018/02/11/Android/InputFlinger/InputDispatcher%E5%92%8CPhoneWindowManager%E7%9A%84%E8%81%94%E7%B3%BB/</loc>
+    <lastmod>2019-12-05</lastmod>
+  </url>  <url>
+    <loc>http://zhouzuoyu.github.io/2018/02/11/Android/InputFlinger/InputReader/</loc>
+    <lastmod>2019-12-05</lastmod>
+  </url>  <url>
+    <loc>http://zhouzuoyu.github.io/2018/02/11/Android/InputFlinger/OverView/</loc>
+    <lastmod>2019-12-05</lastmod>
+  </url>  <url>
+    <loc>http://zhouzuoyu.github.io/2018/02/10/Android/Lights/BatteryService/</loc>
+    <lastmod>2019-12-05</lastmod>
+  </url>  <url>
+    <loc>http://zhouzuoyu.github.io/2018/02/11/Android/InputFlinger/SocketPair/</loc>
+    <lastmod>2019-12-05</lastmod>
+  </url>  <url>
+    <loc>http://zhouzuoyu.github.io/2018/02/10/Android/Lights/DisplayPowerController/</loc>
+    <lastmod>2019-12-05</lastmod>
+  </url>  <url>
+    <loc>http://zhouzuoyu.github.io/2018/02/10/Android/Lights/DisplayPowerState/</loc>
+    <lastmod>2019-12-05</lastmod>
+  </url>  <url>
+    <loc>http://zhouzuoyu.github.io/2018/02/10/Android/Lights/HAL/</loc>
+    <lastmod>2019-12-05</lastmod>
+  </url>  <url>
+    <loc>http://zhouzuoyu.github.io/2018/02/10/Android/Lights/JNI/</loc>
+    <lastmod>2019-12-05</lastmod>
+  </url>  <url>
+    <loc>http://zhouzuoyu.github.io/2018/02/10/Android/Lights/LightsService/</loc>
+    <lastmod>2019-12-05</lastmod>
+  </url>  <url>
+    <loc>http://zhouzuoyu.github.io/2018/02/10/Android/Lights/Overview/</loc>
+    <lastmod>2019-12-05</lastmod>
+  </url>  <url>
+    <loc>http://zhouzuoyu.github.io/2018/02/10/Android/Lights/PowerManagerService/</loc>
+    <lastmod>2019-12-05</lastmod>
+  </url>
+</urlset>

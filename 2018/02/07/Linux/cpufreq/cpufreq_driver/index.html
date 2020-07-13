@@ -1,0 +1,869 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=6.0.2" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=6.0.2">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=6.0.2">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=6.0.2">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=6.0.2" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '6.0.2',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  
+  <meta name="keywords" content="Hexo, NexT">
+
+
+<meta name="description" content="源码drivers\cpufreq\s5pv210-cpufreq.cdrivers\cpufreq\cpufreq.c 功能DVFS的具体执行者">
+<meta property="og:type" content="article">
+<meta property="og:title" content="cpufreq(2)_cpufreq_driver">
+<meta property="og:url" content="http://zhouzuoyu.github.io/2018/02/07/Linux/cpufreq/cpufreq_driver/index.html">
+<meta property="og:site_name" content="千里之行始于足下">
+<meta property="og:description" content="源码drivers\cpufreq\s5pv210-cpufreq.cdrivers\cpufreq\cpufreq.c 功能DVFS的具体执行者">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2019-12-05T06:40:38.307Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="cpufreq(2)_cpufreq_driver">
+<meta name="twitter:description" content="源码drivers\cpufreq\s5pv210-cpufreq.cdrivers\cpufreq\cpufreq.c 功能DVFS的具体执行者">
+
+
+
+
+
+
+  <link rel="canonical" href="http://zhouzuoyu.github.io/2018/02/07/Linux/cpufreq/cpufreq_driver/">
+
+
+  <title>cpufreq(2)_cpufreq_driver | 千里之行始于足下</title>
+  
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"> <div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">千里之行始于足下</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-home"></i> <br>首页</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-th"></i> <br>分类</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>归档</a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+  
+
+
+
+ </div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://zhouzuoyu.github.io/2018/02/07/Linux/cpufreq/cpufreq_driver/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="zhouzuoyu">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="千里之行始于足下">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">cpufreq(2)_cpufreq_driver</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-02-07T12:00:00+08:00">2018-02-07</time>
+            
+
+            
+            
+
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/Linux/" itemprop="url" rel="index"><span itemprop="name">Linux</span></a></span>
+
+                
+                
+                  ， 
+                
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/Linux/cpufreq/" itemprop="url" rel="index"><span itemprop="name">cpufreq</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2018/02/07/Linux/cpufreq/cpufreq_driver/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2018/02/07/Linux/cpufreq/cpufreq_driver/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="源码"><a href="#源码" class="headerlink" title="源码"></a>源码</h1><p>drivers\cpufreq\s5pv210-cpufreq.c<br>drivers\cpufreq\cpufreq.c</p>
+<h1 id="功能"><a href="#功能" class="headerlink" title="功能"></a>功能</h1><p>DVFS的具体执行者<br><a id="more"></a></p>
+<h1 id="源码分析"><a href="#源码分析" class="headerlink" title="源码分析"></a>源码分析</h1><h2 id="register-cpufreq-driver"><a href="#register-cpufreq-driver" class="headerlink" title="register cpufreq_driver"></a>register cpufreq_driver</h2><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">static</span> <span class="class"><span class="keyword">struct</span> <span class="title">cpufreq_driver</span> <span class="title">s5pv210_driver</span> = &#123;</span></span><br><span class="line">    .target_index	= s5pv210_target,	<span class="comment">// FIXME，该函数比较关键</span></span><br><span class="line">    .init		= s5pv210_cpu_init,		<span class="comment">// 初始化，比如设置policy-&gt;min/max...</span></span><br><span class="line">&#125;;</span><br><span class="line"><span class="comment">// 记录最大最小频率</span></span><br><span class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">int</span> <span class="title">s5pv210_cpu_init</span><span class="params">(struct cpufreq_policy *policy)</span></span></span><br><span class="line"><span class="function">	<span class="title">cpufreq_generic_init</span><span class="params">(policy, s5pv210_freq_table, <span class="number">40000</span>)</span></span>;</span><br><span class="line">        cpufreq_table_validate_and_show(policy, table);</span><br><span class="line">            <span class="comment">// 遍历table，找到最大频率和最小频率</span></span><br><span class="line">            cpufreq_frequency_table_cpuinfo(policy, table);</span><br><span class="line">                cpufreq_for_each_valid_entry(pos, table) &#123;</span><br><span class="line">                    freq = pos-&gt;frequency;</span><br><span class="line">                    <span class="keyword">if</span> (freq &lt; min_freq)</span><br><span class="line">                        min_freq = freq;</span><br><span class="line">                    <span class="keyword">if</span> (freq &gt; max_freq)</span><br><span class="line">                        max_freq = freq;</span><br><span class="line">                &#125;</span><br><span class="line">                policy-&gt;min = policy-&gt;cpuinfo.min_freq = min_freq;</span><br><span class="line">                policy-&gt;max = policy-&gt;cpuinfo.max_freq = max_freq;</span><br><span class="line">            <span class="comment">// 传入平台table</span></span><br><span class="line">            policy-&gt;freq_table = table;</span><br><span class="line">            <span class="comment">/*</span></span><br><span class="line"><span class="comment">			 * 根据cpufreq_driver中cpufreq_frequency_table的排列，确定为升序/降序表</span></span><br><span class="line"><span class="comment">			 * policy-&gt;freq_table_sorted = CPUFREQ_TABLE_SORTED_ASCENDING/CPUFREQ_TABLE_SORTED_DESCENDING</span></span><br><span class="line"><span class="comment">			 */</span></span><br><span class="line">            set_freq_table_sorted(policy);	<span class="comment">// freq_table.c</span></span><br></pre></td></tr></table></figure>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">s5pv210_cpufreq_probe</span><br><span class="line">    <span class="keyword">return</span> cpufreq_register_driver(&amp;s5pv210_driver);	<span class="comment">// <span class="doctag">FIXME:</span> 注册平台相关函数: DVFS【执行】函数</span></span><br></pre></td></tr></table></figure>
+<h2 id="dvfs-table"><a href="#dvfs-table" class="headerlink" title="dvfs table"></a>dvfs table</h2><p>平台相关，有如下两张表，电压/频率对应关系<br>L0: 性能优先<br>L4: 功耗优先<br><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">static</span> <span class="class"><span class="keyword">struct</span> <span class="title">s5pv210_dvs_conf</span> <span class="title">dvs_conf</span>[] = &#123;</span></span><br><span class="line">    [L0] = &#123;</span><br><span class="line">        .arm_volt	= <span class="number">1250000</span>,	<span class="comment">// 1.25V</span></span><br><span class="line">        .int_volt	= <span class="number">1100000</span>,	<span class="comment">// 1.1v</span></span><br><span class="line">    &#125;,</span><br><span class="line">    [L1] = &#123;</span><br><span class="line">        .arm_volt	= <span class="number">1200000</span>,</span><br><span class="line">        .int_volt	= <span class="number">1100000</span>,</span><br><span class="line">    &#125;,</span><br><span class="line">    [L2] = &#123;</span><br><span class="line">        .arm_volt	= <span class="number">1050000</span>,</span><br><span class="line">        .int_volt	= <span class="number">1100000</span>,</span><br><span class="line">    &#125;,</span><br><span class="line">    [L3] = &#123;</span><br><span class="line">        .arm_volt	= <span class="number">950000</span>,</span><br><span class="line">        .int_volt	= <span class="number">1100000</span>,</span><br><span class="line">    &#125;,</span><br><span class="line">    [L4] = &#123;</span><br><span class="line">        .arm_volt	= <span class="number">950000</span>,	<span class="comment">// 0.95v</span></span><br><span class="line">        .int_volt	= <span class="number">1000000</span>,	<span class="comment">// 1v</span></span><br><span class="line">    &#125;,</span><br><span class="line">&#125;;</span><br><span class="line"><span class="comment">// 该表必须为升序/降序排列，不能乱排</span></span><br><span class="line"><span class="keyword">static</span> <span class="class"><span class="keyword">struct</span> <span class="title">cpufreq_frequency_table</span> <span class="title">s5pv210_freq_table</span>[] = &#123;</span></span><br><span class="line">    &#123;<span class="number">0</span>, L0, <span class="number">1000</span>*<span class="number">1000</span>&#125;,	<span class="comment">// 1GHz</span></span><br><span class="line">    &#123;<span class="number">0</span>, L1, <span class="number">800</span>*<span class="number">1000</span>&#125;,</span><br><span class="line">    &#123;<span class="number">0</span>, L2, <span class="number">400</span>*<span class="number">1000</span>&#125;,</span><br><span class="line">    &#123;<span class="number">0</span>, L3, <span class="number">200</span>*<span class="number">1000</span>&#125;,</span><br><span class="line">    &#123;<span class="number">0</span>, L4, <span class="number">100</span>*<span class="number">1000</span>&#125;,	<span class="comment">// 100MHz</span></span><br><span class="line">    &#123;<span class="number">0</span>, <span class="number">0</span>, CPUFREQ_TABLE_END&#125;,</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure></p>
+<h2 id="dvfs执行"><a href="#dvfs执行" class="headerlink" title="dvfs执行"></a>dvfs执行</h2><p>根据index(cpufreq governor计算得到)调整电压和freq<br><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">int</span> <span class="title">s5pv210_target</span><span class="params">(struct cpufreq_policy *policy, <span class="keyword">unsigned</span> <span class="keyword">int</span> index)</span></span></span><br><span class="line"><span class="function">	<span class="comment">// 调整arm/int电压</span></span></span><br><span class="line"><span class="function">	arm_volt </span>= dvs_conf[index].arm_volt;</span><br><span class="line">    int_volt = dvs_conf[index].int_volt;	</span><br><span class="line">    ret = regulator_set_voltage(arm_regulator, arm_volt, arm_volt_max);</span><br><span class="line">    ret = regulator_set_voltage(int_regulator, int_volt, int_volt_max);</span><br><span class="line">    <span class="comment">// 调整DRAM刷新率</span></span><br><span class="line">    s5pv210_set_refresh(DMC1, <span class="number">83000</span>);</span><br><span class="line">    s5pv210_set_refresh(DMC0, <span class="number">83000</span>);</span><br><span class="line">    <span class="comment">// 修改分频系数来调整各个频率</span></span><br><span class="line"> 	reg |= ((clkdiv_val[index][<span class="number">0</span>] &lt;&lt; S5P_CLKDIV0_APLL_SHIFT) |</span><br><span class="line">        (clkdiv_val[index][<span class="number">1</span>] &lt;&lt; S5P_CLKDIV0_A2M_SHIFT) |</span><br><span class="line">        (clkdiv_val[index][<span class="number">2</span>] &lt;&lt; S5P_CLKDIV0_HCLK200_SHIFT) |</span><br><span class="line">        (clkdiv_val[index][<span class="number">3</span>] &lt;&lt; S5P_CLKDIV0_PCLK100_SHIFT) |</span><br><span class="line">        (clkdiv_val[index][<span class="number">4</span>] &lt;&lt; S5P_CLKDIV0_HCLK166_SHIFT) |</span><br><span class="line">        (clkdiv_val[index][<span class="number">5</span>] &lt;&lt; S5P_CLKDIV0_PCLK83_SHIFT) |</span><br><span class="line">        (clkdiv_val[index][<span class="number">6</span>] &lt;&lt; S5P_CLKDIV0_HCLK133_SHIFT) |</span><br><span class="line">        (clkdiv_val[index][<span class="number">7</span>] &lt;&lt; S5P_CLKDIV0_PCLK66_SHIFT));</span><br><span class="line">    writel_relaxed(reg, S5P_CLK_DIV0);</span><br></pre></td></tr></table></figure></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/02/07/Linux/cpufreq/cpufreq_governor框架/" rel="next" title="cpufreq(3)_cpufreq_governor框架">
+                <i class="fa fa-chevron-left"></i> cpufreq(3)_cpufreq_governor框架
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/02/07/Linux/chrdev/Misc/" rel="prev" title="字符设备(2)_Misc设备">
+                字符设备(2)_Misc设备 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+    </div>
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="/images/avatar.jpg" alt="zhouzuoyu">
+            
+              <p class="site-author-name" itemprop="name">zhouzuoyu</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">148</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">40</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+            </nav>
+          
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="mailto:hi@zhouzuoyu.com" target="_blank" title="E-Mail">
+                      
+                        <i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#源码"><span class="nav-number">1.</span> <span class="nav-text">源码</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#功能"><span class="nav-number">2.</span> <span class="nav-text">功能</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#源码分析"><span class="nav-number">3.</span> <span class="nav-text">源码分析</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#register-cpufreq-driver"><span class="nav-number">3.1.</span> <span class="nav-text">register cpufreq_driver</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#dvfs-table"><span class="nav-number">3.2.</span> <span class="nav-text">dvfs table</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#dvfs执行"><span class="nav-number">3.3.</span> <span class="nav-text">dvfs执行</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">zhouzuoyu</span>
+
+  
+
+  
+</div>
+
+
+
+
+
+
+
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.0.2"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.0.2"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.0.2"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.0.2"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.0.2"></script>
+
+
+
+  
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+  <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+  <script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+  
+  <script type="text/javascript">
+    var GUEST = ['nick','mail','link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(item=>{
+      return GUEST.indexOf(item)>-1;
+    });
+    new Valine({
+        el: '#comments' ,
+        verify: false,
+        notify: false,
+        appId: 's0qrr1SUElrMtB7IkHDhyquu-gzGzoHsz',
+        appKey: 'rzVUQV27Lo9pBzD6UvCMAzR6',
+        placeholder: 'Just go go',
+        avatar:'mm',
+        guest_info:guest,
+        pageSize:'10' || 10,
+    });
+  </script>
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+<script>
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

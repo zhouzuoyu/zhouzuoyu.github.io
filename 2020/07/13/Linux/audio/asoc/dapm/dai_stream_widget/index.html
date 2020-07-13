@@ -1,0 +1,896 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=6.0.2" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=6.0.2">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=6.0.2">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=6.0.2">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=6.0.2" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '6.0.2',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  
+  <meta name="keywords" content="Hexo, NexT">
+
+
+<meta name="description" content="widget中可以定义一些stream widget，在snd_soc_dai_driver中会自动生成dai widget，如果两者的name一致的话，则会生成一条path。例如：12&amp;#123; &quot;Left Input Mixer&quot;, NULL, &quot;LINPUT1&quot;, &amp;#125;,&amp;#123; &quot;Left ADC&quot;, NULL, &quot;Left Input Mixer&quot; &amp;#125;, “Lef">
+<meta property="og:type" content="article">
+<meta property="og:title" content="dai widget&#x2F;stream widget">
+<meta property="og:url" content="http://zhouzuoyu.github.io/2020/07/13/Linux/audio/asoc/dapm/dai_stream_widget/index.html">
+<meta property="og:site_name" content="千里之行始于足下">
+<meta property="og:description" content="widget中可以定义一些stream widget，在snd_soc_dai_driver中会自动生成dai widget，如果两者的name一致的话，则会生成一条path。例如：12&amp;#123; &quot;Left Input Mixer&quot;, NULL, &quot;LINPUT1&quot;, &amp;#125;,&amp;#123; &quot;Left ADC&quot;, NULL, &quot;Left Input Mixer&quot; &amp;#125;, “Lef">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2020-07-13T08:13:40.443Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="dai widget&#x2F;stream widget">
+<meta name="twitter:description" content="widget中可以定义一些stream widget，在snd_soc_dai_driver中会自动生成dai widget，如果两者的name一致的话，则会生成一条path。例如：12&amp;#123; &quot;Left Input Mixer&quot;, NULL, &quot;LINPUT1&quot;, &amp;#125;,&amp;#123; &quot;Left ADC&quot;, NULL, &quot;Left Input Mixer&quot; &amp;#125;, “Lef">
+
+
+
+
+
+
+  <link rel="canonical" href="http://zhouzuoyu.github.io/2020/07/13/Linux/audio/asoc/dapm/dai_stream_widget/">
+
+
+  <title>dai widget/stream widget | 千里之行始于足下</title>
+  
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"> <div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">千里之行始于足下</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-home"></i> <br>首页</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-th"></i> <br>分类</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>归档</a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+  
+
+
+
+ </div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://zhouzuoyu.github.io/2020/07/13/Linux/audio/asoc/dapm/dai_stream_widget/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="zhouzuoyu">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="千里之行始于足下">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">dai widget/stream widget</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-07-13T15:05:47+08:00">2020-07-13</time>
+            
+
+            
+            
+
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/Linux/" itemprop="url" rel="index"><span itemprop="name">Linux</span></a></span>
+
+                
+                
+                  ， 
+                
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/Linux/asoc/" itemprop="url" rel="index"><span itemprop="name">asoc</span></a></span>
+
+                
+                
+                  ， 
+                
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/Linux/asoc/dapm/" itemprop="url" rel="index"><span itemprop="name">dapm</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2020/07/13/Linux/audio/asoc/dapm/dai_stream_widget/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2020/07/13/Linux/audio/asoc/dapm/dai_stream_widget/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>widget中可以定义一些stream widget，<br>在snd_soc_dai_driver中会自动生成dai widget，<br>如果两者的name一致的话，则会生成一条path。<br>例如：<br><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">&#123; <span class="string">"Left Input Mixer"</span>, <span class="literal">NULL</span>, <span class="string">"LINPUT1"</span>, &#125;,</span><br><span class="line">&#123; <span class="string">"Left ADC"</span>, <span class="literal">NULL</span>, <span class="string">"Left Input Mixer"</span> &#125;,</span><br></pre></td></tr></table></figure></p>
+<p>“Left ADC”.id = snd_soc_dapm_adc，它并不是一个output endpoint，不能形成complete path，所以必须要dai widget配合才能形成complete path。<br><a id="more"></a></p>
+<h1 id="stream-widget"><a href="#stream-widget" class="headerlink" title="stream widget"></a>stream widget</h1><table>
+<thead>
+<tr>
+<th>stream widget</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>snd_soc_dapm_aif_in</td>
+</tr>
+<tr>
+<td>snd_soc_dapm_aif_out</td>
+</tr>
+<tr>
+<td>snd_soc_dapm_dac</td>
+</tr>
+<tr>
+<td>snd_soc_dapm_adc</td>
+</tr>
+</tbody>
+</table>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 用这些宏定义的是stream_widget</span></span><br><span class="line"><span class="comment">/* stream domain */</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> SND_SOC_DAPM_AIF_IN(wname, stname, wslot, wreg, wshift, winvert) \</span></span><br><span class="line">&#123;	.id = snd_soc_dapm_aif_in, .name = wname, .sname = stname, \</span><br><span class="line">    SND_SOC_DAPM_INIT_REG_VAL(wreg, wshift, winvert), &#125;</span><br><span class="line">#define SND_SOC_DAPM_AIF_IN_E(wname, stname, wslot, wreg, wshift, winvert, \</span><br><span class="line">                  wevent, wflags)				\</span><br><span class="line">&#123;	.id = snd_soc_dapm_aif_in, .name = wname, .sname = stname, \</span><br><span class="line">    SND_SOC_DAPM_INIT_REG_VAL(wreg, wshift, winvert), \</span><br><span class="line">    .event = wevent, .event_flags = wflags &#125;</span><br><span class="line">#define SND_SOC_DAPM_AIF_OUT(wname, stname, wslot, wreg, wshift, winvert) \</span><br><span class="line">&#123;	.id = snd_soc_dapm_aif_out, .name = wname, .sname = stname, \</span><br><span class="line">    SND_SOC_DAPM_INIT_REG_VAL(wreg, wshift, winvert), &#125;</span><br><span class="line">#define SND_SOC_DAPM_AIF_OUT_E(wname, stname, wslot, wreg, wshift, winvert, \</span><br><span class="line">                 wevent, wflags)				\</span><br><span class="line">&#123;	.id = snd_soc_dapm_aif_out, .name = wname, .sname = stname, \</span><br><span class="line">    SND_SOC_DAPM_INIT_REG_VAL(wreg, wshift, winvert), \</span><br><span class="line">    .event = wevent, .event_flags = wflags &#125;</span><br><span class="line">#define SND_SOC_DAPM_DAC(wname, stname, wreg, wshift, winvert) \</span><br><span class="line">&#123;	.id = snd_soc_dapm_dac, .name = wname, .sname = stname, \</span><br><span class="line">    SND_SOC_DAPM_INIT_REG_VAL(wreg, wshift, winvert) &#125;</span><br><span class="line">#define SND_SOC_DAPM_DAC_E(wname, stname, wreg, wshift, winvert, \</span><br><span class="line">               wevent, wflags)				\</span><br><span class="line">&#123;	.id = snd_soc_dapm_dac, .name = wname, .sname = stname, \</span><br><span class="line">    SND_SOC_DAPM_INIT_REG_VAL(wreg, wshift, winvert), \</span><br><span class="line">    .event = wevent, .event_flags = wflags&#125;</span><br><span class="line"></span><br><span class="line">#define SND_SOC_DAPM_ADC(wname, stname, wreg, wshift, winvert) \</span><br><span class="line">&#123;	.id = snd_soc_dapm_adc, .name = wname, .sname = stname, \</span><br><span class="line">    SND_SOC_DAPM_INIT_REG_VAL(wreg, wshift, winvert), &#125;</span><br><span class="line">#define SND_SOC_DAPM_ADC_E(wname, stname, wreg, wshift, winvert, \</span><br><span class="line">               wevent, wflags)				\</span><br><span class="line">&#123;	.id = snd_soc_dapm_adc, .name = wname, .sname = stname, \</span><br><span class="line">    SND_SOC_DAPM_INIT_REG_VAL(wreg, wshift, winvert), \</span><br><span class="line">    .event = wevent, .event_flags = wflags&#125;</span><br><span class="line">#define SND_SOC_DAPM_CLOCK_SUPPLY(wname) \</span><br><span class="line">&#123;	.id = snd_soc_dapm_clock_supply, .name = wname, \</span><br><span class="line">    .reg = SND_SOC_NOPM, .event = dapm_clock_event, \</span><br><span class="line">    .event_flags = SND_SOC_DAPM_PRE_PMU | SND_SOC_DAPM_POST_PMD &#125;</span><br></pre></td></tr></table></figure>
+<p>例如：<br><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">SND_SOC_DAPM_ADC(<span class="string">"Left ADC"</span>, <span class="string">"Capture"</span>, WM8960_POWER1, <span class="number">3</span>, <span class="number">0</span>),</span><br><span class="line">&#123;	.id = snd_soc_dapm_adc, .name = wname, .sname = stname, \	<span class="comment">// .sname = Capture</span></span><br><span class="line">    SND_SOC_DAPM_INIT_REG_VAL(wreg, wshift, winvert), &#125;</span><br></pre></td></tr></table></figure></p>
+<h1 id="dai-widget"><a href="#dai-widget" class="headerlink" title="dai widget"></a>dai widget</h1><p>每一个snd_soc_dai_driver会自动创建dai_widget，如果它stream_name和stream_widget中的sname一致，则会自动创建path: {dai_widget, NULL, stream_widget}<br><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">static</span> <span class="class"><span class="keyword">struct</span> <span class="title">snd_soc_dai_driver</span> <span class="title">wm8960_dai</span> = &#123;</span></span><br><span class="line">    .name = <span class="string">"wm8960-hifi"</span>,				<span class="comment">// used for match</span></span><br><span class="line">    .playback = &#123;</span><br><span class="line">        .stream_name = <span class="string">"Playback"</span>,	<span class="comment">// dai_widget.stream_name</span></span><br><span class="line">        .channels_min = <span class="number">1</span>,</span><br><span class="line">        .channels_max = <span class="number">2</span>,</span><br><span class="line">        .rates = WM8960_RATES,</span><br><span class="line">        .formats = WM8960_FORMATS,&#125;,</span><br><span class="line">    .capture = &#123;</span><br><span class="line">        .stream_name = <span class="string">"Capture"</span>,	<span class="comment">// dai_widget.stream_name</span></span><br><span class="line">        .channels_min = <span class="number">1</span>,</span><br><span class="line">        .channels_max = <span class="number">2</span>,</span><br><span class="line">        .rates = WM8960_RATES,</span><br><span class="line">        .formats = WM8960_FORMATS,&#125;,</span><br><span class="line">    .ops = &amp;wm8960_dai_ops,</span><br><span class="line">    .symmetric_rates = <span class="number">1</span>,</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure></p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 挂载到component-&gt;dai_list</span></span><br><span class="line">    ret = snd_soc_register_codec(&amp;i2c-&gt;dev, &amp;soc_codec_dev_wm8960, &amp;wm8960_dai, <span class="number">1</span>);</span><br><span class="line">        codec-&gt;component.probe = snd_soc_codec_drv_probe;	<span class="comment">// return codec-&gt;driver-&gt;probe(codec);</span></span><br><span class="line">        ret = snd_soc_register_dais(&amp;codec-&gt;component, dai_drv, num_dai, <span class="literal">false</span>);</span><br><span class="line">            dai = soc_add_dai(component, dai_drv + i, count == <span class="number">1</span> &amp;&amp; legacy_dai_naming);</span><br><span class="line">                list_add(&amp;dai-&gt;<span class="built_in">list</span>, &amp;component-&gt;dai_list);</span><br><span class="line">        snd_soc_component_add_unlocked(&amp;codec-&gt;component);</span><br><span class="line">            list_add(&amp;component-&gt;<span class="built_in">list</span>, &amp;component_list);</span><br></pre></td></tr></table></figure>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 注册声卡时会使用component-&gt;dai_list</span></span><br><span class="line">    ret = devm_snd_soc_register_card(&amp;pdev-&gt;dev, card);</span><br><span class="line">        ret = snd_soc_register_card(card);</span><br><span class="line">            ret = snd_soc_instantiate_card(card);</span><br><span class="line">                ret = soc_probe_link_components(card, rtd, order);</span><br><span class="line">                    ret = soc_probe_component(card, component);</span><br><span class="line">                        <span class="comment">// 把所有的dai都new_dai_widgets</span></span><br><span class="line">                        list_for_each_entry(dai, &amp;component-&gt;dai_list, <span class="built_in">list</span>) &#123;</span><br><span class="line">                            ret = snd_soc_dapm_new_dai_widgets(dapm, dai);</span><br><span class="line">                        &#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 创建dai widget并且挂载到dapm-&gt;card-&gt;widgets</span></span><br><span class="line">snd_soc_dapm_new_dai_widgets</span><br><span class="line">    <span class="keyword">template</span>.reg = SND_SOC_NOPM;	<span class="comment">// dai_widget是软件概念，不需要reg设置上下电</span></span><br><span class="line">    <span class="keyword">if</span> (dai-&gt;driver-&gt;playback.stream_name) &#123;</span><br><span class="line">        <span class="keyword">template</span>.id = snd_soc_dapm_dai_in;	<span class="comment">// is_ep</span></span><br><span class="line">        <span class="keyword">template</span>.name = dai-&gt;driver-&gt;playback.stream_name;	<span class="comment">// Playback</span></span><br><span class="line">        <span class="keyword">template</span>.sname = dai-&gt;driver-&gt;playback.stream_name;	<span class="comment">// Playback</span></span><br><span class="line">        w = snd_soc_dapm_new_control_unlocked(dapm, &amp;<span class="keyword">template</span>);</span><br><span class="line">        dai-&gt;playback_widget = w;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span> (dai-&gt;driver-&gt;capture.stream_name) &#123;</span><br><span class="line">        <span class="comment">// snd_soc_dai_driver创建dai_widget</span></span><br><span class="line">        <span class="keyword">template</span>.id = snd_soc_dapm_dai_out;	<span class="comment">// is_ep</span></span><br><span class="line">        <span class="keyword">template</span>.name = dai-&gt;driver-&gt;capture.stream_name;	<span class="comment">// Capture</span></span><br><span class="line">        <span class="keyword">template</span>.sname = dai-&gt;driver-&gt;capture.stream_name;	<span class="comment">// Capture</span></span><br><span class="line">        w = snd_soc_dapm_new_control_unlocked(dapm, &amp;<span class="keyword">template</span>);</span><br><span class="line">            w-&gt;is_ep = SND_SOC_DAPM_EP_SINK;</span><br><span class="line">            list_add_tail(&amp;w-&gt;<span class="built_in">list</span>, &amp;dapm-&gt;card-&gt;widgets);</span><br><span class="line"></span><br><span class="line">        dai-&gt;capture_widget = w;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 通过sname进行match &amp;&amp; create new path: &#123;dai_widget, NULL, stream_widget&#125;</span></span><br><span class="line">snd_soc_dapm_link_dai_widgets</span><br><span class="line">    list_for_each_entry(dai_w, &amp;card-&gt;widgets, <span class="built_in">list</span>) &#123;</span><br><span class="line">        <span class="comment">// 筛选出dai_widget</span></span><br><span class="line">        <span class="keyword">switch</span> (dai_w-&gt;id) &#123;</span><br><span class="line">        <span class="keyword">case</span> snd_soc_dapm_dai_in:</span><br><span class="line">        <span class="keyword">case</span> snd_soc_dapm_dai_out:</span><br><span class="line">            <span class="keyword">break</span>;</span><br><span class="line">        <span class="keyword">default</span>:</span><br><span class="line">            <span class="keyword">continue</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">// </span></span><br><span class="line">        list_for_each_entry(w, &amp;card-&gt;widgets, <span class="built_in">list</span>) &#123;</span><br><span class="line">            <span class="comment">// 筛选出非dai_widget进行match，即match dai_widget和stream_widget</span></span><br><span class="line">            <span class="keyword">switch</span> (w-&gt;id) &#123;</span><br><span class="line">            <span class="keyword">case</span> snd_soc_dapm_dai_in:</span><br><span class="line">            <span class="keyword">case</span> snd_soc_dapm_dai_out:</span><br><span class="line">                <span class="keyword">continue</span>;</span><br><span class="line">            <span class="keyword">default</span>:</span><br><span class="line">                <span class="keyword">break</span>;</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            <span class="keyword">if</span> (!w-&gt;sname || !<span class="built_in">strstr</span>(w-&gt;sname, dai_w-&gt;sname))	<span class="comment">// Capture，通过sname来进行match</span></span><br><span class="line">                <span class="keyword">continue</span>;</span><br><span class="line">            <span class="comment">// 找到了</span></span><br><span class="line">            <span class="keyword">if</span> (dai_w-&gt;id == snd_soc_dapm_dai_in) &#123;</span><br><span class="line">                <span class="comment">// playback</span></span><br><span class="line">                src = dai_w;</span><br><span class="line">                sink = w;</span><br><span class="line">            &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                <span class="comment">// capture</span></span><br><span class="line">                src = w;		<span class="comment">// Left ADC</span></span><br><span class="line">                sink = dai_w;</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="comment">// 相当于多了一个path&#123;capture_dai_widget, NULL, "Left ADC"&#125;, 这才是完整的一个complete_path</span></span><br><span class="line">            snd_soc_dapm_add_path(w-&gt;dapm, src, sink, <span class="literal">NULL</span>, <span class="literal">NULL</span>);	<span class="comment">// Left ADC, dai_w, NULL, NULL: control是null，所以是直连</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2020/07/12/Linux/audio/asoc/dapm/qualcomm_dapm/" rel="next" title="qualcomm dapm分析">
+                <i class="fa fa-chevron-left"></i> qualcomm dapm分析
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+    </div>
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="/images/avatar.jpg" alt="zhouzuoyu">
+            
+              <p class="site-author-name" itemprop="name">zhouzuoyu</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">148</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">40</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+            </nav>
+          
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="mailto:hi@zhouzuoyu.com" target="_blank" title="E-Mail">
+                      
+                        <i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#stream-widget"><span class="nav-number">1.</span> <span class="nav-text">stream widget</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#dai-widget"><span class="nav-number">2.</span> <span class="nav-text">dai widget</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">zhouzuoyu</span>
+
+  
+
+  
+</div>
+
+
+
+
+
+
+
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.0.2"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.0.2"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.0.2"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.0.2"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.0.2"></script>
+
+
+
+  
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+  <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+  <script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+  
+  <script type="text/javascript">
+    var GUEST = ['nick','mail','link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(item=>{
+      return GUEST.indexOf(item)>-1;
+    });
+    new Valine({
+        el: '#comments' ,
+        verify: false,
+        notify: false,
+        appId: 's0qrr1SUElrMtB7IkHDhyquu-gzGzoHsz',
+        appKey: 'rzVUQV27Lo9pBzD6UvCMAzR6',
+        placeholder: 'Just go go',
+        avatar:'mm',
+        guest_info:guest,
+        pageSize:'10' || 10,
+    });
+  </script>
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+<script>
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

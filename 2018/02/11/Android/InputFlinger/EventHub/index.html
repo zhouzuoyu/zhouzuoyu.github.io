@@ -1,0 +1,887 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=6.0.2" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=6.0.2">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=6.0.2">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=6.0.2">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=6.0.2" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '6.0.2',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  
+  <meta name="keywords" content="Hexo, NexT">
+
+
+<meta name="description" content="源码EventHub.cpp (native\services\inputflinger) 功能使用epoll和inotify机制共同监测1: /dev/input节点的增减2: /dev/input/eventx事件上报 源码分析inotify使用inotify机制来监测/dev/input/下节点的增减">
+<meta property="og:type" content="article">
+<meta property="og:title" content="InputFlinger(2)_EventHub">
+<meta property="og:url" content="http://zhouzuoyu.github.io/2018/02/11/Android/InputFlinger/EventHub/index.html">
+<meta property="og:site_name" content="千里之行始于足下">
+<meta property="og:description" content="源码EventHub.cpp (native\services\inputflinger) 功能使用epoll和inotify机制共同监测1: /dev/input节点的增减2: /dev/input/eventx事件上报 源码分析inotify使用inotify机制来监测/dev/input/下节点的增减">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2019-12-05T06:40:38.303Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="InputFlinger(2)_EventHub">
+<meta name="twitter:description" content="源码EventHub.cpp (native\services\inputflinger) 功能使用epoll和inotify机制共同监测1: /dev/input节点的增减2: /dev/input/eventx事件上报 源码分析inotify使用inotify机制来监测/dev/input/下节点的增减">
+
+
+
+
+
+
+  <link rel="canonical" href="http://zhouzuoyu.github.io/2018/02/11/Android/InputFlinger/EventHub/">
+
+
+  <title>InputFlinger(2)_EventHub | 千里之行始于足下</title>
+  
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"> <div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">千里之行始于足下</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-home"></i> <br>首页</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-th"></i> <br>分类</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>归档</a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+  
+
+
+
+ </div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://zhouzuoyu.github.io/2018/02/11/Android/InputFlinger/EventHub/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="zhouzuoyu">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="千里之行始于足下">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">InputFlinger(2)_EventHub</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-02-11T12:00:00+08:00">2018-02-11</time>
+            
+
+            
+            
+
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/Android/" itemprop="url" rel="index"><span itemprop="name">Android</span></a></span>
+
+                
+                
+                  ， 
+                
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/Android/InputFlinger/" itemprop="url" rel="index"><span itemprop="name">InputFlinger</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2018/02/11/Android/InputFlinger/EventHub/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2018/02/11/Android/InputFlinger/EventHub/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="源码"><a href="#源码" class="headerlink" title="源码"></a>源码</h1><p>EventHub.cpp (native\services\inputflinger)</p>
+<h1 id="功能"><a href="#功能" class="headerlink" title="功能"></a>功能</h1><p>使用epoll和inotify机制共同监测<br>1: /dev/input节点的增减<br>2: /dev/input/eventx事件上报</p>
+<h1 id="源码分析"><a href="#源码分析" class="headerlink" title="源码分析"></a>源码分析</h1><h2 id="inotify"><a href="#inotify" class="headerlink" title="inotify"></a>inotify</h2><p>使用inotify机制来监测/dev/input/下节点的增减<br><a id="more"></a></p>
+<h3 id="创建inotify"><a href="#创建inotify" class="headerlink" title="创建inotify"></a>创建inotify</h3><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">EventHub::EventHub</span><br><span class="line">    <span class="comment">// inotify</span></span><br><span class="line">    mINotifyFd = inotify_init();</span><br><span class="line">    inotify_add_watch(mINotifyFd, DEVICE_PATH, IN_DELETE | IN_CREATE);	<span class="comment">// 监测"/dev/input"下有无新节点生成</span></span><br><span class="line">    <span class="comment">// epoll /dev/input/下的节点变化</span></span><br><span class="line">    mEpollFd = epoll_create(EPOLL_SIZE_HINT);</span><br><span class="line">    eventItem.events = EPOLLIN;</span><br><span class="line">    eventItem.data.u32 = EPOLL_ID_INOTIFY;</span><br><span class="line">    epoll_ctl(mEpollFd, EPOLL_CTL_ADD, mINotifyFd, &amp;eventItem);</span><br></pre></td></tr></table></figure>
+<h3 id="监测新增设备数据"><a href="#监测新增设备数据" class="headerlink" title="监测新增设备数据"></a>监测新增设备数据</h3><p>例如新增设备：则把/dev/input/eventx添加到mEpollFd进行监测<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">EventHub::readNotifyLocked()</span><br><span class="line">    <span class="comment">// /dev/input/</span></span><br><span class="line">    <span class="built_in">strcpy</span>(devname, DEVICE_PATH);</span><br><span class="line">    filename = devname + <span class="built_in">strlen</span>(devname);</span><br><span class="line">    *filename++ = <span class="string">'/'</span>;</span><br><span class="line">    <span class="comment">// 从inotify中读取拔插的设备名</span></span><br><span class="line">    read(mINotifyFd, event_buf, <span class="keyword">sizeof</span>(event_buf));</span><br><span class="line">    event = (struct inotify_event *)(event_buf + event_pos);</span><br><span class="line">    <span class="built_in">strcpy</span>(filename, event-&gt;name);</span><br><span class="line">    <span class="keyword">if</span> (event-&gt;mask &amp; IN_CREATE)	<span class="comment">// create</span></span><br><span class="line">        openDeviceLocked(devname);</span><br><span class="line">    <span class="keyword">else</span>							<span class="comment">// remove</span></span><br><span class="line">        closeDeviceByPathLocked(devname);</span><br></pre></td></tr></table></figure></p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line">EventHub::openDeviceLocked(<span class="keyword">const</span> <span class="keyword">char</span> *devicePath)	<span class="comment">// /dev/input/eventx</span></span><br><span class="line">    fd = open(devicePath, O_RDWR | O_CLOEXEC);</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// Get device identifier.</span></span><br><span class="line">    ioctl(fd, EVIOCGID, &amp;inputId);</span><br><span class="line">    identifier.bus = inputId.bustype;</span><br><span class="line">    identifier.product = inputId.product;</span><br><span class="line">    identifier.vendor = inputId.vendor;</span><br><span class="line">    identifier.version = inputId.version;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 创建Device(EventHub.cpp)</span></span><br><span class="line">    deviceId = mNextDeviceId++;</span><br><span class="line">    Device* device = <span class="keyword">new</span> Device(fd, deviceId, String8(devicePath), identifier);</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// load idc文件</span></span><br><span class="line">    loadConfigurationLocked(device);</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 如果是keyboard则load kl文件和kcm文件</span></span><br><span class="line">    ioctl(fd, EVIOCGBIT(EV_KEY, <span class="keyword">sizeof</span>(device-&gt;keyBitmask)), device-&gt;keyBitmask);	<span class="comment">// 底层设置了EV_KEY，才能认为是一个keyboard设备</span></span><br><span class="line">    <span class="keyword">bool</span> haveKeyboardKeys = containsNonZeroByte(device-&gt;keyBitmask, <span class="number">0</span>, sizeof_bit_array(BTN_MISC))</span><br><span class="line">            || containsNonZeroByte(device-&gt;keyBitmask, sizeof_bit_array(KEY_OK),</span><br><span class="line">                    sizeof_bit_array(KEY_MAX + <span class="number">1</span>));</span><br><span class="line">    <span class="keyword">if</span> (haveKeyboardKeys || haveGamepadButtons)</span><br><span class="line">        device-&gt;classes |= INPUT_DEVICE_CLASS_KEYBOARD;</span><br><span class="line">    <span class="keyword">if</span> (device-&gt;classes &amp; (INPUT_DEVICE_CLASS_KEYBOARD | INPUT_DEVICE_CLASS_JOYSTICK))</span><br><span class="line">        keyMapStatus = loadKeyMapLocked(device);</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 监测/dev/input/eventx设备</span></span><br><span class="line">    eventItem.events = mUsingEpollWakeup ? EPOLLIN : EPOLLIN | EPOLLWAKEUP;</span><br><span class="line">    eventItem.data.u32 = deviceId;</span><br><span class="line">    epoll_ctl(mEpollFd, EPOLL_CTL_ADD, fd, &amp;eventItem);</span><br><span class="line">    </span><br><span class="line">    addDeviceLocked(device);</span><br><span class="line">        mDevices.add(device-&gt;id, device);</span><br></pre></td></tr></table></figure>
+<h2 id="getEvents"><a href="#getEvents" class="headerlink" title="getEvents"></a>getEvents</h2><p>epoll_wait监测/dev/input/目录下所有的文件，有数据则read，最终将event数据传递给buffer<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br></pre></td><td class="code"><pre><span class="line">EventHub::getEvents(<span class="keyword">int</span> timeoutMillis, RawEvent* buffer, <span class="keyword">size_t</span> bufferSize)</span><br><span class="line">    RawEvent* event = buffer;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">for</span> (;;) &#123;</span><br><span class="line">        <span class="comment">// 对/dev/input/下的所有节点都使用epoll进行监测</span></span><br><span class="line">        <span class="keyword">if</span> (mNeedToScanDevices) &#123;	<span class="comment">// 构造函数中为true</span></span><br><span class="line">            mNeedToScanDevices = <span class="literal">false</span>;</span><br><span class="line">            scanDevicesLocked();</span><br><span class="line">            	scanDirLocked(DEVICE_PATH);	<span class="comment">// "/dev/input"</span></span><br><span class="line">            		dir = opendir(dirname);</span><br><span class="line">            		<span class="built_in">strcpy</span>(devname, dirname);</span><br><span class="line">            		filename = devname + <span class="built_in">strlen</span>(devname);</span><br><span class="line">                    *filename++ = <span class="string">'/'</span>;</span><br><span class="line">            		<span class="keyword">while</span>((de = readdir(dir))) &#123;</span><br><span class="line">                        <span class="built_in">strcpy</span>(filename, de-&gt;d_name);</span><br><span class="line">                        openDeviceLocked(devname);	<span class="comment">// devname == '/dev/input/eventx'</span></span><br><span class="line">                    &#125;</span><br><span class="line">            mNeedToSendFinishedDeviceScan = <span class="literal">true</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        </span><br><span class="line">        <span class="comment">// 读取数据</span></span><br><span class="line">        <span class="keyword">while</span> (mPendingEventIndex &lt; mPendingEventCount) &#123;</span><br><span class="line">            <span class="keyword">const</span> <span class="class"><span class="keyword">struct</span> <span class="title">epoll_event</span>&amp; <span class="title">eventItem</span> = <span class="title">mPendingEventItems</span>[<span class="title">mPendingEventIndex</span>++];</span>			<span class="comment">// 解析事件</span></span><br><span class="line">            <span class="comment">// 1: "/dev/input"下增加了节点/删除了节点，标志位置位但是不读取数据</span></span><br><span class="line">            <span class="keyword">if</span> (eventItem.data.u32 == EPOLL_ID_INOTIFY) &#123;</span><br><span class="line">                <span class="keyword">if</span> (eventItem.events &amp; EPOLLIN)</span><br><span class="line">                    mPendingINotify = <span class="literal">true</span>;	<span class="comment">// 节点变动</span></span><br><span class="line">                <span class="keyword">continue</span>;</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">if</span> (mPendingINotify &amp;&amp; mPendingEventIndex &gt;= mPendingEventCount) &#123;</span><br><span class="line">                mPendingINotify = <span class="literal">false</span>;</span><br><span class="line">                readNotifyLocked();	<span class="comment">// 将新增eventx添加到epoll进行监测</span></span><br><span class="line">                deviceChanged = <span class="literal">true</span>;</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="comment">// 2: 读取event数据，将input_event转化为RawEvent传递出去</span></span><br><span class="line">            deviceIndex = mDevices.indexOfKey(eventItem.data.u32);</span><br><span class="line">            mDevices.valueAt(deviceIndex);</span><br><span class="line">            <span class="keyword">if</span> (eventItem.events &amp; EPOLLIN) &#123;</span><br><span class="line">                readSize = read(device-&gt;fd, readBuffer, <span class="keyword">sizeof</span>(struct input_event) * capacity);	<span class="comment">// 有readSize个event</span></span><br><span class="line">                count = <span class="keyword">size_t</span>(readSize) / <span class="keyword">sizeof</span>(struct input_event);</span><br><span class="line">                <span class="keyword">for</span> (<span class="keyword">size_t</span> i = <span class="number">0</span>; i &lt; count; i++) &#123;</span><br><span class="line">                    <span class="class"><span class="keyword">struct</span> <span class="title">input_event</span>&amp; <span class="title">iev</span> = <span class="title">readBuffer</span>[<span class="title">i</span>];</span></span><br><span class="line">                    event-&gt;deviceId = deviceId;</span><br><span class="line">                    event-&gt;type = iev.type;</span><br><span class="line">                    event-&gt;code = iev.code;</span><br><span class="line">                    event-&gt;value = iev.value;</span><br><span class="line">                    event += <span class="number">1</span>;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">// 有数据则结束此次getEvents</span></span><br><span class="line">        <span class="keyword">if</span> (event != buffer || awoken) &#123;</span><br><span class="line">            <span class="keyword">break</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">// epoll_wait，等待事件</span></span><br><span class="line">        pollResult = epoll_wait(mEpollFd, mPendingEventItems, EPOLL_MAX_EVENTS, timeoutMillis);	<span class="comment">// mPendingEventItems：产生的所有事件</span></span><br><span class="line">        mPendingEventCount = <span class="keyword">size_t</span>(pollResult);	<span class="comment">// mPendingEventCount: 有多少events需要处理</span></span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure></p>
+<h2 id="idc-kl-kcm文件"><a href="#idc-kl-kcm文件" class="headerlink" title="idc/kl/kcm文件"></a>idc/kl/kcm文件</h2><h3 id="idc"><a href="#idc" class="headerlink" title="idc"></a>idc</h3><blockquote>
+<p>InputDeviceConfiguration，用于描述这个input设备特性<br>idc优先级如下：</p>
+<ul>
+<li>/system/usr/idc/Vendor_XXXX_Product_XXXX_Version_XXXX.idc</li>
+<li>/data/system/devices/idc/Vendor_XXXX_Product_XXXX_Version_XXXX.idc</li>
+<li>/system/usr/idc/Vendor_XXXX_Product_XXXX.idc</li>
+<li>/data/system/devices/idc/Vendor_XXXX_Product_XXXX.idc</li>
+<li>/system/usr/idc/DEVICE_NAME.idc</li>
+<li>/data/system/devices/idc/DEVICE_NAME.idc</li>
+</ul>
+</blockquote>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br></pre></td><td class="code"><pre><span class="line">EventHub::loadConfigurationLocked(Device* device)</span><br><span class="line">    <span class="comment">// 1: Search idc文件</span></span><br><span class="line">    device-&gt;configurationFile = getInputDeviceConfigurationFilePathByDeviceIdentifier(device-&gt;identifier, INPUT_DEVICE_CONFIGURATION_FILE_TYPE_CONFIGURATION);</span><br><span class="line">        <span class="comment">// 1: 在/system/usr/idc/和/data/system/devices/idc/下search Vendor_XXXX_Product_XXXX_Version_XXXX.idc</span></span><br><span class="line">        <span class="function">String8 <span class="title">versionPath</span><span class="params">(getInputDeviceConfigurationFilePathByName(</span></span></span><br><span class="line"><span class="function"><span class="params">		        String8::format(<span class="string">"Vendor_%04x_Product_%04x_Version_%04x"</span>,</span></span></span><br><span class="line"><span class="function"><span class="params">		                deviceIdentifier.vendor, deviceIdentifier.product,</span></span></span><br><span class="line"><span class="function"><span class="params">		                deviceIdentifier.version),</span></span></span><br><span class="line"><span class="function"><span class="params">		        type))</span></span>;</span><br><span class="line">            <span class="comment">// 1.1: 先检查/system目录下</span></span><br><span class="line">            path.setTo(getenv(<span class="string">"ANDROID_ROOT"</span>));					<span class="comment">// /system</span></span><br><span class="line">            path.append(<span class="string">"/usr/"</span>);								<span class="comment">// /system/usr/</span></span><br><span class="line">            appendInputDeviceConfigurationFileRelativePath(path, name, type);</span><br><span class="line">                path.append(CONFIGURATION_FILE_DIR[type]);		<span class="comment">// /system/usr/idc/</span></span><br><span class="line">                <span class="keyword">for</span> (<span class="keyword">size_t</span> i = <span class="number">0</span>; i &lt; name.length(); i++) &#123;</span><br><span class="line">                    <span class="keyword">char</span> ch = name[i];</span><br><span class="line">                    <span class="keyword">if</span> (!isValidNameChar(ch)) &#123;</span><br><span class="line">                        ch = <span class="string">'_'</span>;</span><br><span class="line">                    &#125;</span><br><span class="line">                    path.append(&amp;ch, <span class="number">1</span>);						<span class="comment">// /system/usr/idc/Vendor_%04x_Product_%04x_Version_%04x</span></span><br><span class="line">                &#125;</span><br><span class="line">                path.append(CONFIGURATION_FILE_EXTENSION[type]);<span class="comment">// /system/usr/idc/Vendor_%04x_Product_%04x_Version_%04x.idc</span></span><br><span class="line">            <span class="keyword">if</span> (!access(path.<span class="built_in">string</span>(), R_OK))</span><br><span class="line">                <span class="keyword">return</span> path;</span><br><span class="line">            <span class="comment">// 1.2: 再检查/data</span></span><br><span class="line">            path.setTo(getenv(<span class="string">"ANDROID_DATA"</span>));									<span class="comment">// /data</span></span><br><span class="line">            path.append(<span class="string">"/system/devices/"</span>);									<span class="comment">// /data/system/devices/idc/</span></span><br><span class="line">            appendInputDeviceConfigurationFileRelativePath(path, name, type);	<span class="comment">// /data/system/devices/idc/Vendor_%04x_Product_%04x_Version_%04x.idc</span></span><br><span class="line">            <span class="keyword">if</span> (!access(path.<span class="built_in">string</span>(), R_OK))</span><br><span class="line">                <span class="keyword">return</span> path;</span><br><span class="line">        <span class="comment">// 2: 在/system/usr/idc/和/data/system/devices/idc/下search Vendor_XXXX_Product_XXXX.idc</span></span><br><span class="line">        <span class="function">String8 <span class="title">productPath</span><span class="params">(getInputDeviceConfigurationFilePathByName(</span></span></span><br><span class="line"><span class="function"><span class="params">		    String8::format(<span class="string">"Vendor_%04x_Product_%04x"</span>,</span></span></span><br><span class="line"><span class="function"><span class="params">		            deviceIdentifier.vendor, deviceIdentifier.product),</span></span></span><br><span class="line"><span class="function"><span class="params">		    type))</span></span>;</span><br><span class="line">        <span class="comment">// 3: 在/system/usr/idc/和/data/system/devices/idc/下search deviceIdentifier.name.idc</span></span><br><span class="line">        getInputDeviceConfigurationFilePathByName(deviceIdentifier.name, type);</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 2: load</span></span><br><span class="line">    PropertyMap::load(device-&gt;configurationFile, &amp;device-&gt;configuration);</span><br></pre></td></tr></table></figure>
+<h3 id="kl"><a href="#kl" class="headerlink" title="kl"></a>kl</h3><p>kl功能：<br>linux中的Scancode -&gt; android的AKEYCODE_XXX(native\include\android\Keycodes.h)<br>key 139 MENU</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line">KeyLayoutMap::Parser::parse()</span><br><span class="line">    <span class="comment">// 解析kl文件</span></span><br><span class="line">    <span class="keyword">while</span> (!mTokenizer-&gt;isEof()) &#123;</span><br><span class="line">        <span class="comment">// 解析kl文件一行信息</span></span><br><span class="line">        <span class="keyword">if</span> (!mTokenizer-&gt;isEol() &amp;&amp; mTokenizer-&gt;peekChar() != <span class="string">'#'</span>) &#123;</span><br><span class="line">            String8 keywordToken = mTokenizer-&gt;nextToken(WHITESPACE);</span><br><span class="line">            <span class="keyword">if</span> (keywordToken == <span class="string">"key"</span>)											<span class="comment">// search关键字'key'：key 139    MENU</span></span><br><span class="line">            	parseKey();</span><br><span class="line">            		<span class="comment">// scancode</span></span><br><span class="line">            		String8 codeToken = mTokenizer-&gt;nextToken(WHITESPACE);		<span class="comment">// "139"</span></span><br><span class="line">            		<span class="keyword">int32_t</span> code = <span class="keyword">int32_t</span>(strtol(codeToken.<span class="built_in">string</span>(), &amp;end, <span class="number">0</span>));<span class="comment">// 139</span></span><br><span class="line">            		<span class="comment">// AKEYCODE_XXX</span></span><br><span class="line">            		String8 keyCodeToken = mTokenizer-&gt;nextToken(WHITESPACE);	<span class="comment">// "MENU"</span></span><br><span class="line">            		keyCode = getKeyCodeByLabel(keyCodeToken.<span class="built_in">string</span>());			<span class="comment">// AKEYCODE_MENU</span></span><br><span class="line">            			<span class="keyword">return</span> <span class="keyword">int32_t</span>(lookupValueByLabel(label, KEYCODES));</span><br><span class="line">            				<span class="keyword">while</span> (<span class="built_in">list</span>-&gt;literal) &#123;</span><br><span class="line">                                <span class="keyword">if</span> (<span class="built_in">strcmp</span>(literal, <span class="built_in">list</span>-&gt;literal) == <span class="number">0</span>)</span><br><span class="line">                                    <span class="keyword">return</span> <span class="built_in">list</span>-&gt;value;</span><br><span class="line">                                <span class="built_in">list</span>++;</span><br><span class="line">                            &#125;</span><br><span class="line">                    key.keyCode = keyCode;	<span class="comment">// AKEYCODE_XXX</span></span><br><span class="line">                    key.flags = flags;</span><br><span class="line">                    <span class="comment">// 把linux的scancode和android的AKEYCODE_XXX的对应关系填充到 mKeysByScanCode</span></span><br><span class="line">                    KeyedVector&lt;<span class="keyword">int32_t</span>, Key&gt;&amp; <span class="built_in">map</span> = mapUsage ? mMap-&gt;mKeysByUsageCode : mMap-&gt;mKeysByScanCode;	<span class="comment">// mKeysByScanCode</span></span><br><span class="line">                    <span class="built_in">map</span>.add(code, key);</span><br><span class="line">        &#125;</span><br><span class="line">        mTokenizer-&gt;nextLine();</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+<h3 id="kcm"><a href="#kcm" class="headerlink" title="kcm"></a>kcm</h3><p>kcm功能：<br>1：AKEYCODE_XXX-&gt;unicode<br>2：定义Scancode -&gt; AKEYCODE_XXX的对应关系<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br></pre></td><td class="code"><pre><span class="line">KeyCharacterMap::Parser::parse()</span><br><span class="line">    <span class="keyword">while</span> (!mTokenizer-&gt;isEof()) &#123;</span><br><span class="line">        <span class="keyword">if</span> (!mTokenizer-&gt;isEol() &amp;&amp; mTokenizer-&gt;peekChar() != <span class="string">'#'</span>) &#123;</span><br><span class="line">        <span class="keyword">switch</span> (mState) &#123;</span><br><span class="line">            <span class="keyword">case</span> STATE_TOP: &#123;</span><br><span class="line">                String8 keywordToken = mTokenizer-&gt;nextToken(WHITESPACE);</span><br><span class="line">                <span class="comment">/*</span></span><br><span class="line"><span class="comment">                 * Scancode -&gt; AKEYCODE_XXX</span></span><br><span class="line"><span class="comment">                 * map key 139 MENU</span></span><br><span class="line"><span class="comment">                 */</span></span><br><span class="line">                <span class="keyword">if</span> (keywordToken == <span class="string">"map"</span>) &#123;												<span class="comment">// map </span></span><br><span class="line">                	<span class="comment">// scancode-&gt;AKEYCODE_XXX</span></span><br><span class="line">                    mTokenizer-&gt;skipDelimiters(WHITESPACE);</span><br><span class="line">                    <span class="keyword">status_t</span> status = parseMap();</span><br><span class="line">                    	<span class="keyword">if</span> (keywordToken == <span class="string">"key"</span>) &#123;										<span class="comment">// map key</span></span><br><span class="line">                            mTokenizer-&gt;skipDelimiters(WHITESPACE);</span><br><span class="line">                            <span class="keyword">return</span> parseMapKey();</span><br><span class="line">                                String8 codeToken = mTokenizer-&gt;nextToken(WHITESPACE);		<span class="comment">// map key 139</span></span><br><span class="line">                                <span class="keyword">int32_t</span> code = <span class="keyword">int32_t</span>(strtol(codeToken.<span class="built_in">string</span>(), &amp;end, <span class="number">0</span>));<span class="comment">// "139" -&gt; 139</span></span><br><span class="line">                                KeyedVector&lt;<span class="keyword">int32_t</span>, <span class="keyword">int32_t</span>&gt;&amp; <span class="built_in">map</span> = mapUsage ? mMap-&gt;mKeysByUsageCode : mMap-&gt;mKeysByScanCode;</span><br><span class="line">                                String8 keyCodeToken = mTokenizer-&gt;nextToken(WHITESPACE);	<span class="comment">// MENU</span></span><br><span class="line">                                <span class="keyword">int32_t</span> keyCode = getKeyCodeByLabel(keyCodeToken.<span class="built_in">string</span>());	<span class="comment">// AKEYCODE_MENU: 82</span></span><br><span class="line">                                <span class="built_in">map</span>.add(code, keyCode);	<span class="comment">// 存在mKeysByScanCode，so Scancode 139 -&gt; AKEYCODE_MENU 82</span></span><br><span class="line">                        &#125;</span><br><span class="line">                &#125; <span class="keyword">else</span> <span class="keyword">if</span> (keywordToken == <span class="string">"key"</span>) &#123;</span><br><span class="line">                	<span class="comment">/*</span></span><br><span class="line"><span class="comment">                	 * AKEYCODE_XXX-&gt;unicode，分为两部，STATE_TOP-&gt;STATE_KEY</span></span><br><span class="line"><span class="comment">                	 * Part 1</span></span><br><span class="line"><span class="comment">                	 * key MENU &#123;</span></span><br><span class="line"><span class="comment">                	 */</span></span><br><span class="line">                    mTokenizer-&gt;skipDelimiters(WHITESPACE);</span><br><span class="line">                    <span class="keyword">status_t</span> status = parseKey();</span><br><span class="line">                    	<span class="keyword">int32_t</span> keyCode = getKeyCodeByLabel(keyCodeToken.<span class="built_in">string</span>());	<span class="comment">// AKEYCODE_MENU</span></span><br><span class="line">                    	String8 openBraceToken = mTokenizer-&gt;nextToken(WHITESPACE);	<span class="comment">// &#123;</span></span><br><span class="line">                    	mKeyCode = keyCode;	<span class="comment">// AKEYCODE_MENU</span></span><br><span class="line">                        mMap-&gt;mKeys.add(keyCode, <span class="keyword">new</span> Key());</span><br><span class="line">                        mState = STATE_KEY;</span><br><span class="line">                &#125;</span><br><span class="line">                <span class="keyword">break</span>;</span><br><span class="line">            &#125;</span><br><span class="line">            </span><br><span class="line">            <span class="comment">// Part 2</span></span><br><span class="line">            <span class="keyword">case</span> STATE_KEY: &#123;</span><br><span class="line">                <span class="keyword">status_t</span> status = parseKeyProperty();</span><br><span class="line">                <span class="keyword">break</span>;</span><br><span class="line">            &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        mTokenizer-&gt;nextLine();</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure></p>
+<h3 id="kl-kcm文件优先级"><a href="#kl-kcm文件优先级" class="headerlink" title="kl/kcm文件优先级"></a>kl/kcm文件优先级</h3><p>kl/kcm文件优先级如下：<br>/system/usr/keylayout/Vendor_XXXX_Product_XXXX_Version_XXXX.kl/.kcm<br>/data/system/devices/keylayout/Vendor_XXXX_Product_XXXX_Version_XXXX.kl/.kcm<br>/system/usr/keylayout/Vendor_XXXX_Product_XXXX.kl/.kcm<br>/data/system/devices/keylayout/Vendor_XXXX_Product_XXXX.kl/.kcm<br>/system/usr/keylayout/DEVICE_NAME.kl/.kcm<br>/data/system/devices/keylayout/DEVICE_NAME.kl/.kcm</p>
+<p>/system/usr/keylayout/Generic.kl<br>/data/system/devices/keylayout/Generic.kl<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br></pre></td><td class="code"><pre><span class="line">EventHub::loadKeyMapLocked(Device* device)</span><br><span class="line">    device-&gt;keyMap.load(device-&gt;identifier, device-&gt;configuration);</span><br><span class="line">        <span class="comment">// 1: 看idc文件中是否有设置kl和kcm</span></span><br><span class="line">        <span class="keyword">if</span> (deviceConfiguration-&gt;tryGetProperty(String8(<span class="string">"keyboard.layout"</span>),</span><br><span class="line">                keyLayoutName)) &#123;</span><br><span class="line">            <span class="keyword">status_t</span> status = loadKeyLayout(deviceIdenfifier, keyLayoutName);</span><br><span class="line">            <span class="keyword">if</span> (status == NAME_NOT_FOUND) &#123;</span><br><span class="line">                ALOGE(<span class="string">"Configuration for keyboard device '%s' requested keyboard layout '%s' but "</span></span><br><span class="line">                        <span class="string">"it was not found."</span>,</span><br><span class="line">                        deviceIdenfifier.name.<span class="built_in">string</span>(), keyLayoutName.<span class="built_in">string</span>());</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span> (deviceConfiguration-&gt;tryGetProperty(String8(<span class="string">"keyboard.characterMap"</span>),</span><br><span class="line">                keyCharacterMapName)) &#123;</span><br><span class="line">            <span class="keyword">status_t</span> status = loadKeyCharacterMap(deviceIdenfifier, keyCharacterMapName);</span><br><span class="line">            <span class="keyword">if</span> (status == NAME_NOT_FOUND) &#123;</span><br><span class="line">                ALOGE(<span class="string">"Configuration for keyboard device '%s' requested keyboard character "</span></span><br><span class="line">                        <span class="string">"map '%s' but it was not found."</span>,</span><br><span class="line">                        deviceIdenfifier.name.<span class="built_in">string</span>(), keyLayoutName.<span class="built_in">string</span>());</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span> (isComplete())</span><br><span class="line">            <span class="keyword">return</span> OK;</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 2: Vendor_XXXX_Product_XXXX_Version_XXXX/ Vendor_XXXX_Product_XXXX/ DEVICE_NAME kl和kcm文件</span></span><br><span class="line">        <span class="keyword">if</span> (probeKeyMap(deviceIdenfifier, String8::empty()))</span><br><span class="line">        	<span class="comment">// 2.1 kl</span></span><br><span class="line">        	loadKeyLayout(deviceIdentifier, keyMapName);</span><br><span class="line">        		<span class="comment">// 2.1.1 search kl/kcm file</span></span><br><span class="line">        		<span class="function">String8 <span class="title">path</span><span class="params">(getPath(deviceIdentifier, name, INPUT_DEVICE_CONFIGURATION_FILE_TYPE_KEY_LAYOUT))</span></span>;</span><br><span class="line">        			<span class="keyword">return</span> getInputDeviceConfigurationFilePathByDeviceIdentifier(deviceIdentifier, type);</span><br><span class="line">        		<span class="comment">// 2.1.2 解析path中的kl信息到keyLayoutMap</span></span><br><span class="line">        		KeyLayoutMap::load(path, &amp;keyLayoutMap);</span><br><span class="line">        			<span class="keyword">status_t</span> status = Tokenizer::open(filename, &amp;tokenizer);</span><br><span class="line">        			sp&lt;KeyLayoutMap&gt; <span class="built_in">map</span> = <span class="keyword">new</span> KeyLayoutMap();</span><br><span class="line">        			<span class="function">Parser <span class="title">parser</span><span class="params">(<span class="built_in">map</span>.get(), tokenizer)</span></span>;</span><br><span class="line">        			parser.parse();</span><br><span class="line">        			*outMap = <span class="built_in">map</span>;</span><br><span class="line">        		<span class="comment">// 2.1.3 path保存到keyLayoutFile</span></span><br><span class="line">        		keyLayoutFile.setTo(path);</span><br><span class="line">        	<span class="comment">// 2.2 kcm</span></span><br><span class="line">        	loadKeyCharacterMap(deviceIdentifier, keyMapName);</span><br><span class="line">        		<span class="function">String8 <span class="title">path</span><span class="params">(getPath(deviceIdentifier, name, INPUT_DEVICE_CONFIGURATION_FILE_TYPE_KEY_CHARACTER_MAP))</span></span>;</span><br><span class="line">            	KeyCharacterMap::load(path, KeyCharacterMap::FORMAT_BASE, &amp;keyCharacterMap);</span><br><span class="line">            	keyCharacterMapFile.setTo(path);</span><br><span class="line">            <span class="keyword">return</span> OK;</span><br><span class="line">        </span><br><span class="line">        <span class="comment">// 3: Generic.kl和kcm文件</span></span><br><span class="line">        <span class="keyword">if</span> (probeKeyMap(deviceIdenfifier, String8(<span class="string">"Generic"</span>)))</span><br><span class="line">            <span class="keyword">return</span> OK;</span><br></pre></td></tr></table></figure></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/02/11/Android/InputFlinger/GlobalKey/" rel="next" title="InputFlinger(5)_GlobalKey">
+                <i class="fa fa-chevron-left"></i> InputFlinger(5)_GlobalKey
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/02/26/Linux/kernel/kthread/" rel="prev" title="kthread">
+                kthread <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+    </div>
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="/images/avatar.jpg" alt="zhouzuoyu">
+            
+              <p class="site-author-name" itemprop="name">zhouzuoyu</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">148</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">40</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+            </nav>
+          
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="mailto:hi@zhouzuoyu.com" target="_blank" title="E-Mail">
+                      
+                        <i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#源码"><span class="nav-number">1.</span> <span class="nav-text">源码</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#功能"><span class="nav-number">2.</span> <span class="nav-text">功能</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#源码分析"><span class="nav-number">3.</span> <span class="nav-text">源码分析</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#inotify"><span class="nav-number">3.1.</span> <span class="nav-text">inotify</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#创建inotify"><span class="nav-number">3.1.1.</span> <span class="nav-text">创建inotify</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#监测新增设备数据"><span class="nav-number">3.1.2.</span> <span class="nav-text">监测新增设备数据</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#getEvents"><span class="nav-number">3.2.</span> <span class="nav-text">getEvents</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#idc-kl-kcm文件"><span class="nav-number">3.3.</span> <span class="nav-text">idc/kl/kcm文件</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#idc"><span class="nav-number">3.3.1.</span> <span class="nav-text">idc</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#kl"><span class="nav-number">3.3.2.</span> <span class="nav-text">kl</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#kcm"><span class="nav-number">3.3.3.</span> <span class="nav-text">kcm</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#kl-kcm文件优先级"><span class="nav-number">3.3.4.</span> <span class="nav-text">kl/kcm文件优先级</span></a></li></ol></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">zhouzuoyu</span>
+
+  
+
+  
+</div>
+
+
+
+
+
+
+
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.0.2"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.0.2"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.0.2"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.0.2"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.0.2"></script>
+
+
+
+  
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+  <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+  <script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+  
+  <script type="text/javascript">
+    var GUEST = ['nick','mail','link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(item=>{
+      return GUEST.indexOf(item)>-1;
+    });
+    new Valine({
+        el: '#comments' ,
+        verify: false,
+        notify: false,
+        appId: 's0qrr1SUElrMtB7IkHDhyquu-gzGzoHsz',
+        appKey: 'rzVUQV27Lo9pBzD6UvCMAzR6',
+        placeholder: 'Just go go',
+        avatar:'mm',
+        guest_info:guest,
+        pageSize:'10' || 10,
+    });
+  </script>
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+<script>
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
