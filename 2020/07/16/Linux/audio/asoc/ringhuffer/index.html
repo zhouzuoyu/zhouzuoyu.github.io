@@ -1,0 +1,871 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=6.0.2" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=6.0.2">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=6.0.2">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=6.0.2">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=6.0.2" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '6.0.2',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  
+  <meta name="keywords" content="Hexo, NexT">
+
+
+<meta name="description" content="period_size/buffer_sizeperiod_size和buffer_size都是上层设置下来的参数period_size：指定了底层每次dma传输的数据量，frame为单位，例如1024 framesbuffer_size：指定了上层每次传递给底层的数据量 appl_ptr/hw_ptr上层和底层共用了一块内存，并且是producer/consumer的关系，使用了ringbuff">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Ringbuffer">
+<meta property="og:url" content="http://zhouzuoyu.github.io/2020/07/16/Linux/audio/asoc/ringhuffer/index.html">
+<meta property="og:site_name" content="千里之行始于足下">
+<meta property="og:description" content="period_size/buffer_sizeperiod_size和buffer_size都是上层设置下来的参数period_size：指定了底层每次dma传输的数据量，frame为单位，例如1024 framesbuffer_size：指定了上层每次传递给底层的数据量 appl_ptr/hw_ptr上层和底层共用了一块内存，并且是producer/consumer的关系，使用了ringbuff">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2020-07-16T07:11:29.566Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Ringbuffer">
+<meta name="twitter:description" content="period_size/buffer_sizeperiod_size和buffer_size都是上层设置下来的参数period_size：指定了底层每次dma传输的数据量，frame为单位，例如1024 framesbuffer_size：指定了上层每次传递给底层的数据量 appl_ptr/hw_ptr上层和底层共用了一块内存，并且是producer/consumer的关系，使用了ringbuff">
+
+
+
+
+
+
+  <link rel="canonical" href="http://zhouzuoyu.github.io/2020/07/16/Linux/audio/asoc/ringhuffer/">
+
+
+  <title>Ringbuffer | 千里之行始于足下</title>
+  
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"> <div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">千里之行始于足下</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-home"></i> <br>首页</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-th"></i> <br>分类</a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>归档</a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+  
+
+
+
+ </div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://zhouzuoyu.github.io/2020/07/16/Linux/audio/asoc/ringhuffer/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="zhouzuoyu">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="千里之行始于足下">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Ringbuffer</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-07-16T12:00:00+08:00">2020-07-16</time>
+            
+
+            
+            
+
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/Linux/" itemprop="url" rel="index"><span itemprop="name">Linux</span></a></span>
+
+                
+                
+                  ， 
+                
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/Linux/asoc/" itemprop="url" rel="index"><span itemprop="name">asoc</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2020/07/16/Linux/audio/asoc/ringhuffer/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2020/07/16/Linux/audio/asoc/ringhuffer/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="period-size-buffer-size"><a href="#period-size-buffer-size" class="headerlink" title="period_size/buffer_size"></a>period_size/buffer_size</h1><p>period_size和buffer_size都是上层设置下来的参数<br>period_size：指定了底层每次dma传输的数据量，frame为单位，例如1024 frames<br>buffer_size：指定了上层每次传递给底层的数据量</p>
+<h1 id="appl-ptr-hw-ptr"><a href="#appl-ptr-hw-ptr" class="headerlink" title="appl_ptr/hw_ptr"></a>appl_ptr/hw_ptr</h1><p>上层和底层共用了一块内存，并且是producer/consumer的关系，使用了ringbuffer的方式进行内存管理<br>需要两个指针：appl_ptr和hw_ptr<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;buffer_size<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;---------- appl_ptr<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;…|&nbsp;&nbsp;|&nbsp;&nbsp;|&nbsp;&nbsp;|&nbsp;&nbsp;|…<br>hw_ptr&nbsp;----------</p>
+<a id="more"></a>
+<p>appl_ptr指示了上层数据的当前位置，hw_ptr指示了底层数据的当前位置<br>hw_ptr靠dma中断更新，每次+=period_size</p>
+<p>appl_ptr&gt;=hw_ptr，一般情况控制在appl_ptr-hw_ptr=buffer_size<br>限制hw_ptr和appl_ptr在一个buffer_size的距离里，防止appl_ptr写的太快，毕竟是ringbuffer，没有同步限制，早晚会被覆盖掉<br>检测appl_ptr和hw_ptr的距离，&gt;=buffer_size，appl_ptr就等等，这段时间里dma继续传输，所以hw_ptr会更新上来</p>
+<h2 id="hw-ptr-appl-ptr更新周期"><a href="#hw-ptr-appl-ptr更新周期" class="headerlink" title="hw_ptr/appl_ptr更新周期"></a>hw_ptr/appl_ptr更新周期</h2><p>hw_ptr的节奏是确定的，即一次dma搬移的时间=1024/48000=21.3ms<br>如果appl_ptr写入较慢，&gt;21.3×period_count，则会underrun</p>
+<p>appl_ptr写入最快的时间也是确定的，即≈21.3×period_count，底层有等待机制(wait_for_avail)，确保基本同步<br>上层每次传递buffer_size(例如4*period_size)的数据下来，其实在底层是分了4次执行，主要原因是dma每次只搬period_size的数据<br><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">while</span> (size &gt; <span class="number">0</span>) &#123;	<span class="comment">// 循环了4次</span></span><br><span class="line">    frames = size &gt; avail ? avail : size;	<span class="comment">// avail=period_size</span></span><br><span class="line">    writer(substream, appl_ofs, data, offset, frames, transfer);	<span class="comment">// memcpy到dma内存空间</span></span><br><span class="line">    appl_ptr += frames;	<span class="comment">// 更新appl_ptr</span></span><br><span class="line">    size -= frames;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h1 id="log分析"><a href="#log分析" class="headerlink" title="log分析"></a>log分析</h1><p>上层会传递buffer_size(period_size*period_count)的数据下来，tinyplay中默认period_count是4<br>底层dma每次搬移都是period_size的数据，所以要分4次搬移<br>因为上层每次给底层都是4个period_size，底层每次搬移1个period_size，所以中间涉及到等待，即上层要等待底层把上一次的buffer_size数据搬移掉上层才能把数据cp进来<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br></pre></td><td class="code"><pre><span class="line">[   69.264421] Enter __snd_pcm_lib_xfer					// 一次buffer_size的传输</span><br><span class="line">[   69.266300] avail=0, hw_ptr=45056, appl_ptr=49152	// appl_ptr-hw_ptr=buffer_size: 两者距离有点远了，appl_ptr需要等等hw_ptr</span><br><span class="line">/* 1st */</span><br><span class="line">[   69.267893] Enter while, size=4096					// 等待一次period_size传输</span><br><span class="line">// wait begin(wait_for_avail)</span><br><span class="line">[   69.269005] enter !avail branch</span><br><span class="line">[   69.270244] Enter wait_for_avail</span><br><span class="line">// snd_pcm_playback_avail走了3次，但是if (avail &gt;= runtime-&gt;twake)只判断了2次，这个想不明白</span><br><span class="line">[   69.271310] avail=0, hw_ptr=45056, appl_ptr=49152</span><br><span class="line">[   69.274252] avail = 0</span><br><span class="line">[   69.275841] avail=1024, hw_ptr=46080, appl_ptr=49152	// dma transfer finished, hw_ptr updated.</span><br><span class="line">[   69.279535] avail=1024, hw_ptr=46080, appl_ptr=49152</span><br><span class="line">[   69.281461] avail = 1024	// 每次avail都是1024，因为period_size就是1024，底层dma每次搬移都是1024</span><br><span class="line">[   69.282169] Leave wait_for_avail</span><br><span class="line">[   69.283638] leave !avail branch</span><br><span class="line">// wait finish than memcpy, update appl_ptr. appl_ptr+=period_sie</span><br><span class="line">[   69.285008] writer</span><br><span class="line"></span><br><span class="line">/* 2nd */</span><br><span class="line">[   69.285831] Enter while, size=3072</span><br><span class="line">[   69.286701] enter !avail branch</span><br><span class="line">[   69.287940] Enter wait_for_avail</span><br><span class="line">[   69.289115] avail=0, hw_ptr=46080, appl_ptr=50176</span><br><span class="line">[   69.290118] avail = 0</span><br><span class="line">[   69.295779] avail=1024, hw_ptr=47104, appl_ptr=50176</span><br><span class="line">[   69.297389] avail=1024, hw_ptr=47104, appl_ptr=50176</span><br><span class="line">[   69.299502] avail = 1024</span><br><span class="line">[   69.300532] Leave wait_for_avail</span><br><span class="line">[   69.301696] leave !avail branch</span><br><span class="line">[   69.303227] writer</span><br><span class="line"></span><br><span class="line">// 3rd</span><br><span class="line">[   69.304349] Enter while, size=2048</span><br><span class="line">[   69.305627] enter !avail branch</span><br><span class="line">[   69.306450] Enter wait_for_avail</span><br><span class="line">[   69.307318] avail=0, hw_ptr=47104, appl_ptr=51200</span><br><span class="line">[   69.308808] avail = 0</span><br><span class="line">[   69.315888] avail=1024, hw_ptr=48128, appl_ptr=51200</span><br><span class="line">[   69.317538] avail=1024, hw_ptr=48128, appl_ptr=51200</span><br><span class="line">[   69.318767] avail = 1024</span><br><span class="line">[   69.319643] Leave wait_for_avail</span><br><span class="line">[   69.320783] leave !avail branch</span><br><span class="line">[   69.321772] writer</span><br><span class="line">[   69.322695] Enter while, size=1024</span><br><span class="line"></span><br><span class="line">// 4th</span><br><span class="line">[   69.323944] enter !avail branch</span><br><span class="line">[   69.325140] Enter wait_for_avail</span><br><span class="line">[   69.326126] avail=0, hw_ptr=48128, appl_ptr=52224</span><br><span class="line">[   69.327874] avail = 0</span><br><span class="line">[   69.335841] avail=1024, hw_ptr=49152, appl_ptr=52224</span><br><span class="line">[   69.337470] avail=1024, hw_ptr=49152, appl_ptr=52224</span><br><span class="line">[   69.338854] avail = 1024</span><br><span class="line">[   69.339534] Leave wait_for_avail</span><br><span class="line">[   69.340296] leave !avail branch</span><br><span class="line">[   69.341211] writer</span><br><span class="line">[   69.341750] avail=0, hw_ptr=49152, appl_ptr=53248</span><br></pre></td></tr></table></figure></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2020/07/13/Linux/audio/asoc/dapm/dai_stream_widget/" rel="next" title="dai widget/stream widget">
+                <i class="fa fa-chevron-left"></i> dai widget/stream widget
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2020/07/17/Linux/audio/asoc/s3c24xx_uda134x/" rel="prev" title="s3c24xx_uda134x驱动分析">
+                s3c24xx_uda134x驱动分析 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+    </div>
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="/images/avatar.jpg" alt="zhouzuoyu">
+            
+              <p class="site-author-name" itemprop="name">zhouzuoyu</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">150</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">40</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+            </nav>
+          
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="mailto:hi@zhouzuoyu.com" target="_blank" title="E-Mail">
+                      
+                        <i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#period-size-buffer-size"><span class="nav-number">1.</span> <span class="nav-text">period_size/buffer_size</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#appl-ptr-hw-ptr"><span class="nav-number">2.</span> <span class="nav-text">appl_ptr/hw_ptr</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#hw-ptr-appl-ptr更新周期"><span class="nav-number">2.1.</span> <span class="nav-text">hw_ptr/appl_ptr更新周期</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#log分析"><span class="nav-number">3.</span> <span class="nav-text">log分析</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">zhouzuoyu</span>
+
+  
+
+  
+</div>
+
+
+
+
+
+
+
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.0.2"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.0.2"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.0.2"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.0.2"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.0.2"></script>
+
+
+
+  
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+  <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+  <script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+  
+  <script type="text/javascript">
+    var GUEST = ['nick','mail','link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(item=>{
+      return GUEST.indexOf(item)>-1;
+    });
+    new Valine({
+        el: '#comments' ,
+        verify: false,
+        notify: false,
+        appId: 's0qrr1SUElrMtB7IkHDhyquu-gzGzoHsz',
+        appKey: 'rzVUQV27Lo9pBzD6UvCMAzR6',
+        placeholder: 'Just go go',
+        avatar:'mm',
+        guest_info:guest,
+        pageSize:'10' || 10,
+    });
+  </script>
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+<script>
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
